@@ -1,0 +1,5 @@
+.DS_Store
+*.png.tmp
+node_modules/
+# AI files are large (75MB), excluded from git to make repo lightweight and fast for GitHub Pages
+*.ai

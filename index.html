@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raymons • Linesheet Studio | Otomatik Koleksiyon ve Katalog Sistemi</title>
+  
+  <!-- Google Fonts: Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Studio Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/logo.png">
+</head>
+<body>
+
+  <!-- ==========================================================================
+       NAVBAR
+       ========================================================================== -->
+  <nav class="studio-navbar">
+    <div class="brand-wrapper">
+      <div class="brand-logo-badge">
+        <span>RAYMONS</span>
+        <span class="brand-dot"></span>
+        <span>LINESHEET</span>
+      </div>
+      <span class="brand-badge">PRO STUDIO</span>
+    </div>
+
+    <!-- Quick Action Preset Buttons -->
+    <div class="quick-actions">
+      <button id="btn-load-sample" class="btn btn-secondary" title="P1059 hazır şablonunu ve görsellerini yükle">
+        <span>🚀</span> Örnek Doldur (P1059)
+      </button>
+      <button id="btn-load-customer-excel" class="btn btn-secondary" title="18 renkli müşteri excelini test et">
+        <span>📄</span> Örnek Excel Yükle
+      </button>
+      <button id="btn-reset" class="btn btn-outline-danger" title="Yeni boş linesheet aç">
+        <span>🧹</span> Temizle
+      </button>
+
+      <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+
+      <!-- Export Buttons -->
+      <button id="btn-quick-whatsapp" class="btn btn-whatsapp" title="WhatsApp için optimize edilmiş hafif PDF indir">
+        <span>💬</span> WhatsApp PDF
+      </button>
+      <button id="btn-quick-print" class="btn btn-primary" title="Matbaa ve sunum için yüksek çözünürlüklü 300 DPI PDF">
+        <span>🖨️</span> Baskı PDF (HQ)
+      </button>
+      <button id="btn-quick-jpg" class="btn btn-secondary" title="Direkt resim olarak indir">
+        <span>🖼️</span> JPG İndir
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==========================================================================
+       MAIN STUDIO CONTAINER
+       ========================================================================== -->
+  <div class="studio-container">
+    
+    <!-- LEFT CONTROL SIDEBAR -->
+    <aside class="control-sidebar">
+      <!-- Tabs Header -->
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" data-tab="excel">
+          <span>📊</span> Excel & Bilgi
+        </button>
+        <button class="tab-btn" data-tab="icons">
+          <span>🏷️</span> Kumaş İkonları
+        </button>
+        <button class="tab-btn" data-tab="images">
+          <span>🖼️</span> Görseller
+        </button>
+        <button class="tab-btn" data-tab="colors">
+          <span>🎨</span> Renkler
+        </button>
+        <button class="tab-btn" data-tab="export">
+          <span>⚙️</span> Çıktı
+        </button>
+      </div>
+
+      <!-- Tab Panels Content -->
+      <div class="sidebar-content">
+        
+        <!-- ==================== TAB 1: EXCEL & BİLGİLER ==================== -->
+        <div id="panel-excel" class="tab-panel active">
+          
+          <!-- Dropzone -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>📥</span> Excel Yükle</span>
+              <span class="badge badge-info">Otomatik Ayrıştırma</span>
+            </div>
+            
+            <div id="excel-dropzone" class="dropzone">
+              <input type="file" id="excel-input" accept=".xlsx, .xls, .csv">
+              <div class="dropzone-icon">📑</div>
+              <div class="dropzone-text">Excel dosyasını sürükleyin veya tıklayın</div>
+              <div class="dropzone-hint">.xlsx, .xls formatında müşteri dosyaları</div>
+            </div>
+          </div>
+
+          <!-- Parsed Fields -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>✏️</span> Ürün Detayları</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="input-article">Article No / Kod</label>
+                <input type="text" id="input-article" class="form-input" placeholder="Örn: P1059">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="input-main-color">Ana Renk (Primary)</label>
+                <input type="text" id="input-main-color" class="form-input" placeholder="Örn: Vizon">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-composition">Kumaş İçeriği (Composition)</label>
+              <input type="text" id="input-composition" class="form-input" placeholder="Örn: %80 Naylon - %20 Elestan">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-asorti">Asorti / Beden Dağılımı</label>
+              <textarea id="input-asorti" class="form-input" rows="2" placeholder="Örn: 31:1 / 32:2 / 33:2 / 34:2 / 36:2 / 38:1"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-total">Toplam Adet (Total)</label>
+              <input type="text" id="input-total" class="form-input" placeholder="Örn: 10 Pcs">
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 2: KUMAŞ İKONLARI ==================== -->
+        <div id="panel-icons" class="tab-panel">
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>🏷️</span> Karışım İkonları Seçici</span>
+              <span class="badge badge-info">Tıkla & Ekle</span>
+            </div>
+            <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:12px;">
+              İstediğiniz kumaş lifi veya konfor özelliğine tıklayın; linesheet'teki ikon alanına otomatik olarak yerleşecektir.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label">Linesheet'te Aktif Olan İkonlar:</label>
+              <div id="active-icons-tray" class="active-icons-tray"></div>
+            </div>
+
+            <div class="form-group" style="margin-top: 14px;">
+              <label class="form-label">Kumaş & Özellik Kataloğu:</label>
+              <div id="icon-picker-grid" class="icon-picker-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 3: GÖRSELLER ==================== -->
+        <div id="panel-images" class="tab-panel">
+          
+          <!-- Batch Upload -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>📸</span> Toplu Görsel Yükle</span>
+            </div>
+            
+            <div id="images-dropzone" class="dropzone">
+              <input type="file" id="images-input" accept="image/*" multiple>
+              <div class="dropzone-icon">🖼️</div>
+              <div class="dropzone-text">Tüm ürün fotoğraflarını buraya bırakın</div>
+              <div class="dropzone-hint">Toplu seçim desteklenir (.jpg, .png, .webp)</div>
+            </div>
+
+            <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+              <button class="btn btn-secondary btn-sm" onclick="window.linesheetApp.imageManager.autoMatchImages()">
+                <span>⚡</span> Akıllı Otomatik Eşleştir
+              </button>
+            </div>
+          </div>
+
+          <!-- Slot Mapping -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>🎯</span> Ana Model Görsel Yuvaları</span>
+            </div>
+            <div id="slots-list" class="slots-list"></div>
+          </div>
+
+          <!-- Uploaded Gallery -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>🗂️</span> Yüklenen Görseller Havuzu</span>
+            </div>
+            <div id="uploaded-gallery" class="uploaded-gallery"></div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 4: RENK SIRALAMASI ==================== -->
+        <div id="panel-colors" class="tab-panel">
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>🎨</span> Renk Varyantları</span>
+              <button class="btn btn-secondary btn-sm" onclick="window.linesheetApp.colorManager.addColor()">
+                <span>+</span> Yeni Renk
+              </button>
+            </div>
+            <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:12px;">
+              Sıralamayı değiştirmek için tutamaçtan (⋮⋮) sürükleyip bırakabilir veya ok tuşlarını kullanabilirsiniz.
+            </p>
+
+            <div id="colors-reorder-list" class="colors-reorder-list"></div>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 5: ÇIKTI AYARLARI ==================== -->
+        <div id="panel-export" class="tab-panel">
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>💾</span> Dışa Aktarma & Kalite</span>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div class="quality-card selected" data-quality="whatsapp" onclick="window.linesheetApp.exportManager.showModal('whatsapp')">
+                <input type="radio" name="export-q" class="quality-radio" checked>
+                <div class="quality-meta">
+                  <div class="quality-title">
+                    <span>💬 WhatsApp İçin Optimize PDF</span>
+                    <span class="quality-badge badge-whatsapp">HIZLI & HAFİF</span>
+                  </div>
+                  <div class="quality-desc">Düşük dosya boyutu (~800KB), WhatsApp'ta anında iletilir, müşteriye gönderilmeye hazır.</div>
+                </div>
+              </div>
+
+              <div class="quality-card" data-quality="print" onclick="window.linesheetApp.exportManager.showModal('print')">
+                <input type="radio" name="export-q" class="quality-radio">
+                <div class="quality-meta">
+                  <div class="quality-title">
+                    <span>🖨️ Matbaa & Baskı Kalitesi</span>
+                    <span class="quality-badge badge-print">300 DPI HQ</span>
+                  </div>
+                  <div class="quality-desc">Maksimum çözünürlük, kristal netliğinde vektör logo ve baskı için kayıpsız çıktı.</div>
+                </div>
+              </div>
+
+              <div class="quality-card" data-quality="image" onclick="window.linesheetApp.exportManager.showModal('image')">
+                <input type="radio" name="export-q" class="quality-radio">
+                <div class="quality-meta">
+                  <div class="quality-title">
+                    <span>🖼️ Direkt Görsel (JPG)</span>
+                  </div>
+                  <div class="quality-desc">PDF açmadan doğrudan fotoğraf olarak WhatsApp veya sosyal medyada paylaşın.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN CANVAS WORKSPACE -->
+    <main class="canvas-workspace">
+      
+      <!-- Toolbar -->
+      <div class="workspace-toolbar">
+        <div class="toolbar-group">
+          <button id="btn-zoom-out" class="btn btn-secondary btn-sm" title="Küçült">-</button>
+          <span id="zoom-percentage" class="zoom-badge">55%</span>
+          <button id="btn-zoom-in" class="btn btn-secondary btn-sm" title="Büyüt">+</button>
+          <button id="btn-zoom-fit" class="btn btn-secondary btn-sm" title="Ekrana Sığdır">Fit</button>
+          <button id="btn-zoom-100" class="btn btn-secondary btn-sm" title="Gerçek Boyut 100%">100%</button>
+        </div>
+
+        <div class="toolbar-group">
+          <span style="font-size:0.75rem; color:#64748b;">
+            💡 İpucu: Tasarım üzerindeki yazılara tıklayarak doğrudan düzenleyebilirsiniz.
+          </span>
+        </div>
+      </div>
+
+      <!-- Canvas Scrollable Area -->
+      <div id="canvas-scroll-container" class="canvas-scroll-container">
+        <div id="canvas-wrapper" class="canvas-wrapper">
+          
+          <!-- ==========================================================================
+               THE ACTUAL LINESHEET SHEET (1080 x 1850 px exact AI template reproduction)
+               ========================================================================== -->
+          <div id="linesheet-sheet" class="linesheet-sheet">
+            
+            <!-- 1. Header: Raymons Life Logo -->
+            <div class="ls-logo">
+              <img src="assets/logo.png" alt="Raymons • Life">
+            </div>
+
+            <!-- 2. Header: Garment Specs Grid -->
+            <div class="ls-specs-container">
+              <!-- Left Column: Article No -->
+              <div class="ls-spec-col">
+                <div class="ls-label">Article No:</div>
+                <div id="ls-val-article" class="ls-value ls-editable" contenteditable="true">P1059</div>
+              </div>
+
+              <!-- Right Column: Composition -->
+              <div class="ls-spec-col">
+                <div class="ls-label">Composition:</div>
+                <div id="ls-val-composition" class="ls-value ls-editable" contenteditable="true">%80 Naylon - %20 Elestan</div>
+              </div>
+
+              <!-- Second Row Left: Asorti & Total -->
+              <div class="ls-spec-col">
+                <div class="ls-label">Asorti:</div>
+                <div id="ls-val-asorti" class="ls-value ls-editable" contenteditable="true">31:1 / 32:2 / 33:2 / 34:2 /<br>36:2 / 38:1</div>
+                <div id="ls-val-total" class="ls-value ls-value-total ls-editable" contenteditable="true">Total: 10 Pcs</div>
+              </div>
+
+              <!-- Second Row Right: Color -->
+              <div class="ls-spec-col">
+                <div class="ls-label">Color:</div>
+                <div id="ls-val-main-color" class="ls-value ls-editable" contenteditable="true">Vizon</div>
+              </div>
+            </div>
+
+            <!-- 3. Fabric & Feature Icons Row -->
+            <div id="ls-icons-row" class="ls-icons-row">
+              <!-- Rendered dynamically by IconManager -->
+            </div>
+
+            <!-- 4. Hero / Lifestyle Image (Right Side) -->
+            <div id="ls-hero-slot" class="ls-hero-image-slot ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('hero')" title="Büyük Model Görselini Değiştir">
+              <img src="assets/samples/P1059-Vizon-İmaj.jpg" alt="Hero Lifestyle">
+            </div>
+
+            <!-- 5. Ana Renk 4 Detay Görselleri (2x2 Grid) -->
+            <div class="ls-detail-grid">
+              <div id="ls-detail-1" class="ls-detail-slot slot-zoom-waist ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('detail1')" title="Detay 1 Görselini Değiştir">
+                <img src="assets/samples/P1059-Vizon-Model-Ön.jpg" alt="Detay 1">
+              </div>
+              <div id="ls-detail-2" class="ls-detail-slot ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('detail2')" title="Detay 2 Görselini Değiştir">
+                <img src="assets/samples/P1059-Vizon-Model-Ön.jpg" alt="Detay 2">
+              </div>
+              <div id="ls-detail-3" class="ls-detail-slot ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('detail3')" title="Detay 3 Görselini Değiştir">
+                <img src="assets/samples/P1059-Vizon-Model-ARKA.jpg" alt="Detay 3">
+              </div>
+              <div id="ls-detail-4" class="ls-detail-slot ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('detail4')" title="Detay 4 Görselini Değiştir">
+                <img src="assets/samples/P1059-Vizon-Ghost-Ön.jpg" alt="Detay 4">
+              </div>
+            </div>
+
+            <!-- 6. Bottom Colors Section (Ürün Renkleri) -->
+            <div class="ls-variants-section">
+              <div id="ls-variants-grid" class="ls-variants-grid">
+                <!-- Rendered dynamically by ColorManager -->
+              </div>
+            </div>
+
+            <!-- 7. Footer: Divider, Links & QR Code -->
+            <div class="ls-footer">
+              <div class="ls-footer-line"></div>
+              <div class="ls-footer-img">
+                <img src="assets/footer.png" alt="Raymons Footer">
+              </div>
+            </div>
+
+          </div><!-- /linesheet-sheet -->
+
+        </div><!-- /canvas-wrapper -->
+      </div><!-- /canvas-scroll-container -->
+
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       EXPORT MODAL
+       ========================================================================== -->
+  <div id="export-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Linesheet İndir</h3>
+        <button id="modal-close-btn" class="modal-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="quality-card selected" data-quality="whatsapp">
+          <input type="radio" name="modal-q" class="quality-radio" checked>
+          <div class="quality-meta">
+            <div class="quality-title">
+              <span>💬 WhatsApp Paylaşım PDF</span>
+              <span class="quality-badge badge-whatsapp">HIZLI & HAFİF</span>
+            </div>
+            <div class="quality-desc">Sıkıştırılmış hafif PDF (~800KB). Müşterilere WhatsApp'tan dosya kotasını zorlamadan göndermek için idealdir.</div>
+          </div>
+        </div>
+
+        <div class="quality-card" data-quality="print">
+          <input type="radio" name="modal-q" class="quality-radio">
+          <div class="quality-meta">
+            <div class="quality-title">
+              <span>🖨️ Yüksek Çözünürlüklü Baskı PDF</span>
+              <span class="quality-badge badge-print">300 DPI HQ</span>
+            </div>
+            <div class="quality-desc">Kristal netliğinde vektör ve yüksek çözünürlüklü raster. Matbaa çıktısı ve katalog basımı içindir.</div>
+          </div>
+        </div>
+
+        <div class="quality-card" data-quality="image">
+          <input type="radio" name="modal-q" class="quality-radio">
+          <div class="quality-meta">
+            <div class="quality-title">
+              <span>🖼️ WhatsApp Görseli (JPG)</span>
+            </div>
+            <div class="quality-desc">Doğrudan fotoğraf galerisine kaydedilir, WhatsApp sohbetinde belge yerine direkt resim olarak açılır.</div>
+          </div>
+        </div>
+
+        <!-- Progress indicator -->
+        <div id="export-progress" class="progress-container">
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+          <div id="progress-text" class="progress-text">Hazırlanıyor...</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.linesheetApp.exportManager.hideModal()">Vazgeç</button>
+        <button id="btn-confirm-export" class="btn btn-primary">İndirmeyi Başlat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       SCRIPTS (Completely Self-Contained)
+       ========================================================================== -->
+  <script src="libs/xlsx.full.min.js"></script>
+  <script src="libs/jspdf.umd.min.js"></script>
+  <script src="libs/html2canvas.min.js"></script>
+  <script src="libs/sortable.min.js"></script>
+
+  <script src="js/excel-parser.js"></script>
+  <script src="js/icon-manager.js"></script>
+  <script src="js/color-manager.js"></script>
+  <script src="js/image-manager.js"></script>
+  <script src="js/export-manager.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
