@@ -123,12 +123,12 @@ class ExportManager {
         this.setProgress(100, 'Tamamlandı!');
         setTimeout(() => this.hideModal(), 700);
       } else {
-        this.setProgress(20, 'Yüksek çözünürlüklü baskı sayfası taranıyor...');
-        const scale = 2.2;
+        this.setProgress(20, 'Yüksek çözünürlüklü baskı sayfası taranıyor (300 DPI HQ)...');
+        const scale = 3.2;
         const canvas = await this.renderSheetToCanvas(sheet, scale);
 
-        this.setProgress(70, 'Baskı kalitesinde PDF derleniyor...');
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        this.setProgress(70, 'Baskı kalitesinde PDF derleniyor (Sıfır Pikselleşme)...');
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
 
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({
@@ -138,7 +138,7 @@ class ExportManager {
           compress: true
         });
 
-        pdf.addImage(imgData, 'JPEG', 0, 0, 1080, 1850);
+        pdf.addImage(imgData, 'JPEG', 0, 0, 1080, 1850, undefined, 'SLOW');
         this.setProgress(90, 'Dosya kaydediliyor...');
         pdf.save(`${filenameBase}-Baski_HQ.pdf`);
 
@@ -198,7 +198,7 @@ class ExportManager {
 
       // Create high-res baked canvas for this slot
       const slotCanvas = document.createElement('canvas');
-      const bakeScale = Math.max(2, scale);
+      const bakeScale = Math.max(3.2, scale);
       slotCanvas.width = Math.round(slotW * bakeScale);
       slotCanvas.height = Math.round(slotH * bakeScale);
       slotCanvas.style.width = `${slotW}px`;

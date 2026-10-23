@@ -94,26 +94,43 @@ class LinesheetApp {
       }
     });
 
-    // Global drag & drop on window: user can drop Excel anywhere on screen!
+    // Global drag & drop on window: ONLY for external OS files, NOT internal UI drags (like color sortable)!
     window.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      document.body.classList.add('file-drag-active');
+      // Check if the drag actually contains files from the operating system
+      const types = e.dataTransfer ? Array.from(e.dataTransfer.types || []) : [];
+      const hasFiles = types.includes('Files');
+
+      // Do NOT trigger if dragging internal elements (e.g. Sortable color cards or images)
+      if (hasFiles && !e.target.closest('#colors-reorder-list') && !e.target.closest('.color-card-item')) {
+        e.preventDefault();
+        document.body.classList.add('file-drag-active');
+      }
     });
 
     ['dragleave', 'dragend'].forEach(name => {
       window.addEventListener(name, (e) => {
-        if (e.clientX <= 0 || e.clientY <= 0) {
+        if (e.clientX <= 0 || e.clientY <= 0 || e.target === document.documentElement) {
           document.body.classList.remove('file-drag-active');
         }
       });
     });
 
-    window.addEventListener('drop', async (e) => {
-      e.preventDefault();
+    // Ensure dragging ends clean on mouseup
+    window.addEventListener('mouseup', () => {
       document.body.classList.remove('file-drag-active');
-      if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+    });
+
+    window.addEventListener('drop', async (e) => {
+      document.body.classList.remove('file-drag-active');
+      const types = e.dataTransfer ? Array.from(e.dataTransfer.types || []) : [];
+      if (types.includes('Files') && e.dataTransfer.files.length > 0) {
+        // If dropped inside color list or image frame, let those specific handlers handle it
+        if (e.target.closest('#colors-reorder-list') || e.target.closest('.color-card-item')) {
+          return;
+        }
         const file = e.dataTransfer.files[0];
         if (/\.(xlsx|xls|csv)$/i.test(file.name)) {
+          e.preventDefault();
           await this.handleExcelFile(file);
         }
       }
