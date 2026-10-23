@@ -42,6 +42,7 @@ class LinesheetApp {
     this.initColorLayoutControls();
     this.initZoomControls();
     this.initQuickActions();
+    this.initMobileResponsiveness();
 
     // Initial update of linesheet
     this.updateLinesheetText();
@@ -382,13 +383,14 @@ class LinesheetApp {
      ========================================================================== */
   initZoomControls() {
     const setZoom = (scale) => {
-      this.zoomScale = Math.min(Math.max(scale, 0.25), 1.5);
+      this.zoomScale = Math.min(Math.max(scale, 0.15), 1.5);
+      const isMobile = window.innerWidth <= 900;
       const wrapper = document.getElementById('canvas-wrapper');
       if (wrapper) {
         wrapper.style.transform = `scale(${this.zoomScale})`;
         wrapper.style.transformOrigin = 'top center';
         wrapper.style.width = `${1080 * this.zoomScale}px`;
-        wrapper.style.height = `${1850 * this.zoomScale + 60}px`;
+        wrapper.style.height = `${1850 * this.zoomScale + (isMobile ? 30 : 60)}px`;
       }
       const badge = document.getElementById('zoom-percentage');
       if (badge) {
@@ -406,24 +408,134 @@ class LinesheetApp {
     const container = document.getElementById('canvas-scroll-container');
     if (!container) return;
 
-    const availableWidth = container.clientWidth - 80;
-    const availableHeight = container.clientHeight - 80;
+    const isMobile = window.innerWidth <= 900;
+    const paddingX = isMobile ? 16 : 80;
+    const paddingY = isMobile ? 24 : 80;
+
+    const availableWidth = Math.max(container.clientWidth - paddingX, 260);
+    const availableHeight = Math.max(container.clientHeight - paddingY, 260);
 
     const scaleW = availableWidth / 1080;
     const scaleH = availableHeight / 1850;
-    const fitScale = Math.min(scaleW, scaleH, 0.72);
 
-    this.zoomScale = Math.max(fitScale, 0.35);
+    // On mobile, scale based on screen width so linesheet fits edge-to-edge
+    let fitScale;
+    if (isMobile) {
+      fitScale = Math.min(scaleW, 0.70);
+    } else {
+      fitScale = Math.min(scaleW, scaleH, 0.72);
+    }
+
+    this.zoomScale = Math.max(fitScale, 0.18);
     const wrapper = document.getElementById('canvas-wrapper');
     if (wrapper) {
       wrapper.style.transform = `scale(${this.zoomScale})`;
       wrapper.style.transformOrigin = 'top center';
       wrapper.style.width = `${1080 * this.zoomScale}px`;
-      wrapper.style.height = `${1850 * this.zoomScale + 60}px`;
+      wrapper.style.height = `${1850 * this.zoomScale + (isMobile ? 30 : 60)}px`;
     }
 
     const badge = document.getElementById('zoom-percentage');
     if (badge) badge.innerText = `${Math.round(this.zoomScale * 100)}%`;
+  }
+
+  /* ==========================================================================
+     MOBILE RESPONSIVENESS & VIEW SWITCHER (iOS HIG & Android M3)
+     ========================================================================== */
+  initMobileResponsiveness() {
+    const container = document.querySelector('.studio-container');
+    const previewBtn = document.getElementById('btn-view-preview');
+    const editorBtn = document.getElementById('btn-view-editor');
+    const jumpToPreviewBtn = document.getElementById('btn-mobile-jump-preview');
+    const dockEditBtn = document.getElementById('btn-dock-edit');
+    const dockWhatsappBtn = document.getElementById('btn-dock-whatsapp');
+
+    const setMobileView = (viewName) => {
+      if (!container) return;
+      if (viewName === 'preview') {
+        container.classList.remove('view-editor');
+        container.classList.add('view-preview');
+        previewBtn?.classList.add('active');
+        editorBtn?.classList.remove('active');
+        setTimeout(() => this.fitCanvasToScreen(), 50);
+      } else {
+        container.classList.remove('view-preview');
+        container.classList.add('view-editor');
+        editorBtn?.classList.add('active');
+        previewBtn?.classList.remove('active');
+      }
+    };
+
+    // Initial view for mobile: preview mode by default
+    if (window.innerWidth <= 900 && container) {
+      container.classList.add('view-preview');
+    }
+
+    previewBtn?.addEventListener('click', () => setMobileView('preview'));
+    editorBtn?.addEventListener('click', () => setMobileView('editor'));
+    jumpToPreviewBtn?.addEventListener('click', () => setMobileView('preview'));
+    dockEditBtn?.addEventListener('click', () => setMobileView('editor'));
+
+    dockWhatsappBtn?.addEventListener('click', () => {
+      this.exportManager.showModal('whatsapp');
+    });
+
+    // Mobile slide-out drawer menu
+    const drawer = document.getElementById('mobile-menu-drawer');
+    const menuToggle = document.getElementById('btn-mobile-menu-toggle');
+    const menuClose = document.getElementById('btn-close-mobile-menu');
+
+    const openDrawer = () => drawer?.classList.add('active');
+    const closeDrawer = () => drawer?.classList.remove('active');
+
+    menuToggle?.addEventListener('click', openDrawer);
+    menuClose?.addEventListener('click', closeDrawer);
+    drawer?.addEventListener('click', (e) => {
+      if (e.target === drawer) closeDrawer();
+    });
+
+    // Wire mobile menu drawer action buttons
+    document.getElementById('btn-mobile-whatsapp')?.addEventListener('click', () => {
+      this.exportManager.showModal('whatsapp');
+    });
+
+    document.getElementById('btn-mobile-sample')?.addEventListener('click', () => {
+      closeDrawer();
+      this.loadSampleP1059();
+      setMobileView('preview');
+    });
+
+    document.getElementById('btn-mobile-customer-excel')?.addEventListener('click', async () => {
+      closeDrawer();
+      await this.loadCustomerExcelSample();
+      setMobileView('preview');
+    });
+
+    document.getElementById('btn-mobile-print')?.addEventListener('click', () => {
+      closeDrawer();
+      this.exportManager.showModal('print');
+    });
+
+    document.getElementById('btn-mobile-jpg')?.addEventListener('click', () => {
+      closeDrawer();
+      this.exportManager.runExport('image');
+    });
+
+    document.getElementById('btn-mobile-reset')?.addEventListener('click', () => {
+      closeDrawer();
+      if (confirm('Tüm bilgileri sıfırlamak istediğinize emin misiniz?')) {
+        this.resetAll();
+        setMobileView('preview');
+      }
+    });
+
+    // Auto refit on window resize / orientation change
+    window.addEventListener('resize', () => {
+      this.fitCanvasToScreen();
+    });
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => this.fitCanvasToScreen(), 200);
+    });
   }
 
   /* ==========================================================================

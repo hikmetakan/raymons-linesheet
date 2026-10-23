@@ -29,8 +29,8 @@
       <span class="brand-badge">PRO STUDIO v2</span>
     </div>
 
-    <!-- Quick Action Preset Buttons -->
-    <div class="quick-actions">
+    <!-- Quick Action Preset Buttons (Desktop) -->
+    <div class="quick-actions desktop-only-actions">
       <button id="btn-load-sample" class="btn btn-secondary" title="P1059 hazır şablonunu ve görsellerini yükle">
         <span>🚀</span> Örnek Doldur (P1059)
       </button>
@@ -41,7 +41,7 @@
         <span>🧹</span> Temizle
       </button>
 
-      <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+      <div class="desktop-divider"></div>
 
       <!-- Export Buttons -->
       <button id="btn-quick-whatsapp" class="btn btn-whatsapp" title="WhatsApp için optimize edilmiş hafif PDF indir">
@@ -54,7 +54,54 @@
         <span>🖼️</span> JPG İndir
       </button>
     </div>
+
+    <!-- Mobile-Only Navbar Actions -->
+    <div class="mobile-nav-actions">
+      <button id="btn-mobile-whatsapp" class="btn btn-whatsapp btn-sm" title="WhatsApp için optimize PDF indir">
+        <span>💬</span> WhatsApp
+      </button>
+      <button id="btn-mobile-menu-toggle" class="btn btn-secondary btn-sm" title="Diğer İşlemler">
+        <span>⋮ Menü</span>
+      </button>
+    </div>
   </nav>
+
+  <!-- Mobile Slide-Out Menu Drawer -->
+  <div id="mobile-menu-drawer" class="mobile-menu-drawer">
+    <div class="mobile-menu-content">
+      <div class="mobile-menu-header">
+        <span>⚙️ İşlemler & Dışa Aktar</span>
+        <button id="btn-close-mobile-menu" class="btn-icon-tiny">✕</button>
+      </div>
+      <div class="mobile-menu-list">
+        <button id="btn-mobile-sample" class="mobile-menu-item">
+          <span>🚀</span> Örnek Doldur (P1059)
+        </button>
+        <button id="btn-mobile-customer-excel" class="mobile-menu-item">
+          <span>📄</span> 18 Renkli Örnek Excel Yükle
+        </button>
+        <button id="btn-mobile-print" class="mobile-menu-item">
+          <span>🖨️</span> Baskı PDF (300 DPI HQ)
+        </button>
+        <button id="btn-mobile-jpg" class="mobile-menu-item">
+          <span>🖼️</span> JPG Fotoğraf Olarak İndir
+        </button>
+        <button id="btn-mobile-reset" class="mobile-menu-item text-danger">
+          <span>🧹</span> Sayfayı Temizle / Sıfırla
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Segmented View Switcher (Visible on <= 900px) -->
+  <div class="mobile-view-bar" id="mobile-view-bar">
+    <button class="mobile-switch-btn active" id="btn-view-preview" data-view="preview">
+      <span>👁️</span> Linesheet Önizleme
+    </button>
+    <button class="mobile-switch-btn" id="btn-view-editor" data-view="editor">
+      <span>✏️</span> Düzenleme Paneli
+    </button>
+  </div>
 
   <!-- ==========================================================================
        MAIN STUDIO CONTAINER
@@ -379,6 +426,13 @@
           </div>
         </div>
 
+        <!-- Mobile Bottom Action: Quick switch to Preview -->
+        <div class="mobile-sticky-bottom-action">
+          <button id="btn-mobile-jump-preview" class="btn btn-primary" style="width: 100%;">
+            <span>👁️</span> Değişiklikleri Önizle & İndir
+          </button>
+        </div>
+
       </div>
     </aside>
 
@@ -483,6 +537,16 @@
 
         </div><!-- /canvas-wrapper -->
       </div><!-- /canvas-scroll-container -->
+
+      <!-- Mobile Floating Dock in Preview Mode -->
+      <div class="mobile-floating-dock">
+        <button id="btn-dock-edit" class="btn btn-secondary btn-sm">
+          <span>✏️</span> Düzenle
+        </button>
+        <button id="btn-dock-whatsapp" class="btn btn-whatsapp btn-sm">
+          <span>💬</span> WhatsApp PDF
+        </button>
+      </div>
 
     </main>
   </div>
