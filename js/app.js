@@ -69,19 +69,24 @@ class LinesheetApp {
     ['dragenter', 'dragover'].forEach(name => {
       dropzone.addEventListener(name, (e) => {
         e.preventDefault();
+        e.stopPropagation();
         dropzone.classList.add('dragover');
       });
     });
 
-    ['dragleave', 'drop'].forEach(name => {
+    ['dragleave'].forEach(name => {
       dropzone.addEventListener(name, (e) => {
         e.preventDefault();
+        e.stopPropagation();
         dropzone.classList.remove('dragover');
       });
     });
 
     dropzone.addEventListener('drop', async (e) => {
-      if (e.dataTransfer.files.length > 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer && e.dataTransfer.files.length > 0) {
         await this.handleExcelFile(e.dataTransfer.files[0]);
       }
     });
@@ -101,11 +106,11 @@ class LinesheetApp {
   }
 
   applyParsedData(parsed) {
-    if (parsed.articleNo !== undefined) this.data.articleNo = parsed.articleNo;
-    if (parsed.composition !== undefined) this.data.composition = parsed.composition;
-    if (parsed.asorti !== undefined) this.data.asorti = parsed.asorti;
-    if (parsed.total !== undefined) this.data.total = parsed.total;
-    if (parsed.mainColor !== undefined) this.data.mainColor = parsed.mainColor;
+    if (parsed.articleNo) this.data.articleNo = parsed.articleNo;
+    if (parsed.composition) this.data.composition = parsed.composition;
+    if (parsed.asorti) this.data.asorti = parsed.asorti;
+    if (parsed.total) this.data.total = parsed.total;
+    if (parsed.mainColor) this.data.mainColor = parsed.mainColor;
 
     // Auto-adjust Asorti font size if Asorti text is very long
     if (this.data.asorti && this.data.asorti.length > 48) {

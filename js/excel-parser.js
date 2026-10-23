@@ -3,22 +3,16 @@
  * Robust Garment & Textile Linesheet Parser
  *
  * Desteklenen Formatlar:
- * 1. Raymons_Linesheet_Siparis_Formu.xlsx (Profesyonel Müşteri Şablonu)
- * 2. Tek sütunlu serbest müşteri listeleri (örn: müşteriden gelen excel.xlsx)
- * 3. Tablo / kolonlu sipariş listeleri
- *
- * Kurallar:
- * - Artıcle / Article numara -> Article No:
- * - Color / Ana Renk -> İlk yazılan renk üstteki Color: alanına
- * - Diğer Renkler (Renk 1, Renk 2... veya alt satırlar) -> Alttaki Renk Varyantlarına
- * - Asorti -> Asorti: kısmına
- * - Toplam ... adet -> Total: .. Pcs kısmına ("adet" -> "Pcs" otomatik çevrilir)
- * - Kompozisyon (% veya kumaş lifi) -> Composition: kısmına
+ * 1. Raymons_Linesheet_Siparis_Formu.xlsx (Profesyonel Müşteri Şablonu - Çok Sayfalı)
+ * 2. Tek sütunlu serbest müşteri listeleri (örn: müşteriden gelen excel.xlsx, 21011.xlsx)
+ * 3. Tablo / kolonlu sipariş listeleri (örn: Başlıksız e-tablo.xlsx)
  */
 
 class ExcelParser {
   /**
    * Parse an Excel file (ArrayBuffer or File)
+   * Scans all sheets in the workbook and automatically selects the sheet
+   * that contains the most complete garment data.
    * @param {File|ArrayBuffer} fileOrBuffer
    * @returns {Promise<Object>} Extracted Linesheet Data
    */
@@ -31,19 +25,67 @@ class ExcelParser {
     }
 
     const workbook = XLSX.read(data, { type: 'array' });
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
+    let bestResult = null;
+    let highestScore = -1;
 
-    // Convert sheet to 2D array of rows
-    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+    // Scan all sheets in the workbook
+    for (const sheetName of workbook.SheetNames) {
+      const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) continue;
 
-    return this.extractGarmentData(rows);
+      const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+      if (!rows || rows.length === 0) continue;
+
+      const result = this.extractGarmentData(rows, sheetName);
+      const score = this.calculateCompletenessScore(result, sheetName);
+
+      // Prioritize the sheet with the most valid data
+      if (score > highestScore) {
+        highestScore = score;
+        bestResult = result;
+      }
+    }
+
+    if (!bestResult || highestScore <= 0) {
+      // Fallback: Return empty structure if no sheet had readable data
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = firstSheet ? XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' }) : [];
+      return this.extractGarmentData(rows, workbook.SheetNames[0]);
+    }
+
+    return bestResult;
+  }
+
+  /**
+   * Score extracted data completeness
+   */
+  static calculateCompletenessScore(data, sheetName = '') {
+    if (!data) return 0;
+    let score = 0;
+    if (data.articleNo && data.articleNo.length > 0) score += 20;
+    if (data.mainColor && data.mainColor.length > 0 && !/örnek|vitrin|ana\s*renk|field/i.test(data.mainColor)) score += 15;
+    if (data.composition && data.composition.length > 0 && !/örnek|kumaş\s*içeriği/i.test(data.composition)) score += 15;
+    if (data.asorti && data.asorti.length > 0 && !/örnek|beden\s*dağılımı/i.test(data.asorti)) score += 15;
+    if (data.total && data.total.length > 0 && !/örnek|toplam\s*pcs/i.test(data.total)) score += 10;
+    if (Array.isArray(data.colors)) {
+      const validColors = data.colors.filter(c => c && !/örnek|varyant|alan\s*adı|renk\s*adı/i.test(c));
+      score += validColors.length * 2;
+    }
+
+    // BONUS: If this is NOT an "Örnek" / "Sample" reference sheet, give it priority!
+    // That way, if the customer actually filled the Order Form sheet, it always takes precedence over the example sheet.
+    const isReferenceSheet = /örnek|sample|referans|taslak|dolu/i.test(sheetName);
+    if (!isReferenceSheet && score >= 20) {
+      score += 200; // Real customer input always wins over reference example sheet
+    }
+
+    return score;
   }
 
   /**
    * Intelligently extract garment specifications from rows
    */
-  static extractGarmentData(rows) {
+  static extractGarmentData(rows, sheetName = '') {
     const result = {
       articleNo: '',
       composition: '',
@@ -57,51 +99,74 @@ class ExcelParser {
     const asortiLines = [];
     let section = 'header';
 
+    // Helper: is placeholder instruction text
+    const isPlaceholder = (str) => {
+      if (!str) return true;
+      return /^(örnek|model veya|vitrin\s*\/|kumaş içeriği|beden dağılımı|toplam adet|1\. varyant|\d+\.\s*varyant|alan adı|müşteri bilgi)/i.test(str.trim());
+    };
+
     for (let r = 0; r < rows.length; r++) {
       const row = rows[r];
       if (!Array.isArray(row)) continue;
 
-      // Extract non-empty trimmed cells
+      // Extract raw columns preserving positions
+      const col0 = row[0] !== undefined && row[0] !== null ? String(row[0]).trim() : '';
+      const col1 = row.length > 1 && row[1] !== undefined && row[1] !== null ? String(row[1]).trim() : '';
+      const col2 = row.length > 2 && row[2] !== undefined && row[2] !== null ? String(row[2]).trim() : '';
+
+      // All non-empty cells
       const cells = row.map(c => String(c).trim()).filter(Boolean);
       if (cells.length === 0) continue;
 
-      const c0 = cells[0];
-      const c1 = cells.length > 1 ? cells[1] : '';
       const raw = cells.join(' | ');
 
-      // Skip table header titles
+      // Skip table header / instruction banner rows
       if (/ALAN ADI|FIELD NAME|ÖRNEK DOLDURULMUŞ|SİPARİŞ VE ÜRÜN BİLGİ/i.test(raw)) {
         continue;
       }
 
+      // Check if this row is formatted as [Label, Value, (Optional Hint)]
+      const isMultiCol = row.length >= 2;
+
       // 1. Article / Model No
-      if (/^(art[ıiIİ]cle|model|ürün\s*kodu|kod)/i.test(c0) || /^(art[ıiIİ]cle|model)\s*[:：]/i.test(raw)) {
-        let val = (c1 && !/^(art[ıiIİ]cle|model|kod)/i.test(c1)) ? c1 : '';
-        if (!val) {
+      if (/^(art[ıiIİ]cle|model|ürün\s*kodu|kod)/i.test(col0) || /^(art[ıiIİ]cle|model)\s*[:：]/i.test(raw)) {
+        let val = '';
+        if (isMultiCol) {
+          val = col1;
+        } else {
           const parts = raw.split(/[:：|]/);
           if (parts.length > 1) val = parts[1].trim();
         }
-        if (val) result.articleNo = val;
+        if (val && !isPlaceholder(val)) {
+          val = val.replace(/\.0$/, ''); // Clean Excel floats (e.g. 22920.0 -> 22920)
+          result.articleNo = val;
+        }
         continue;
       }
 
       // 2. Renk X / Color X (Explicit variant row from Raymons Form, e.g. 'Renk 1:', 'Bordo')
-      if (/^(renk|color)\s*\d+[:：]?/i.test(c0)) {
-        const val = (c1 && !/varyant|renk\s*adı|örnek/i.test(c1)) ? c1 : '';
-        if (val) {
+      if (/^(renk|color)\s*\d+[:：]?/i.test(col0)) {
+        let val = isMultiCol ? col1 : '';
+        if (!val) {
+          const parts = raw.split(/[:：|]/);
+          if (parts.length > 1) val = parts[1].trim();
+        }
+        if (val && !isPlaceholder(val) && !/varyant|renk\s*adı|örnek/i.test(val)) {
           result.colors.push(val);
         }
         continue;
       }
 
       // 3. Main Color (Color / Ana Renk)
-      if (/^(color|ana\s*renk|renk)\b/i.test(c0) || /^(color|renk)\s*[:：]/i.test(raw)) {
-        let val = (c1 && !/^(color|ana\s*renk|renk)/i.test(c1)) ? c1 : '';
-        if (!val) {
+      if (/^(color|ana\s*renk|renk)\b/i.test(col0) || /^(color|renk)\s*[:：]/i.test(raw)) {
+        let val = '';
+        if (isMultiCol) {
+          val = col1;
+        } else {
           const parts = raw.split(/[:：|]/);
-          if (parts.length > 1 && parts[1].trim()) val = parts[1].trim();
+          if (parts.length > 1) val = parts[1].trim();
         }
-        if (val) {
+        if (val && !isPlaceholder(val)) {
           result.mainColor = val;
         }
         section = 'colors';
@@ -109,70 +174,81 @@ class ExcelParser {
       }
 
       // 4. Composition / Kumaş İçeriği
-      if (/^(composition|kumaş|içerik|karışım)\b/i.test(c0) || /^(composition|kumaş)\s*[:：]/i.test(raw)) {
-        let val = (c1 && !/^(composition|kumaş|karışım)/i.test(c1)) ? c1 : '';
-        if (!val) {
+      if (/^(composition|kumaş|içerik|karışım)\b/i.test(col0) || /^(composition|kumaş)\s*[:：]/i.test(raw)) {
+        let val = '';
+        if (isMultiCol) {
+          val = col1;
+        } else {
           const parts = raw.split(/[:：]/);
           if (parts.length > 1) val = parts[1].trim();
         }
-        if (val) result.composition = val;
+        if (val && !isPlaceholder(val)) {
+          result.composition = val;
+        }
         continue;
       }
 
-      // 5. Asorti Header
-      if (/^(asort[ıiIİ]|beden)/i.test(c0) || /^asort[ıiIİ]\s*[:：]/i.test(raw)) {
-        let val = (c1 && !/^(asort|beden)/i.test(c1)) ? c1 : '';
-        if (!val) {
+      // 5. Asorti Header / Content
+      if (/^(asort[ıiIİ]|beden)/i.test(col0) || /^asort[ıiIİ]\s*[:：]/i.test(raw)) {
+        let val = '';
+        if (isMultiCol) {
+          val = col1;
+        } else {
           const parts = raw.split(/[:：|]/);
           if (parts.length > 1 && parts[1].trim()) val = parts[1].trim();
         }
-        if (val) asortiLines.push(val);
+        if (val && !isPlaceholder(val)) {
+          asortiLines.push(val);
+        }
         section = 'asorti';
         continue;
       }
 
       // 6. Toplam / Total
-      if (/^(toplam|total)\b/i.test(c0) || /^(toplam|total)\s*[:：]/i.test(raw)) {
-        let val = (c1 && !/^(toplam|total)/i.test(c1)) ? c1 : '';
-        if (!val) {
+      if (/^(toplam|total)\b/i.test(col0) || /^(toplam|total)\s*[:：]/i.test(raw)) {
+        let val = '';
+        if (isMultiCol) {
+          val = col1;
+        } else {
           const parts = raw.split(/[:：|]/);
           if (parts.length > 1) val = parts[1].trim();
+          if (!val) val = raw.replace(/^(toplam|total)[:\s]*/i, '').trim();
         }
-        if (!val) {
-          val = raw.replace(/^(toplam|total)[:\s]*/i, '').trim();
+        if (val && !isPlaceholder(val)) {
+          val = val.replace(/\.0$/, '');
+          val = val.replace(/\badet\b/gi, 'Pcs').replace(/\bpcs\b/gi, 'Pcs').trim();
+          if (val && !/pcs/i.test(val)) {
+            val += ' Pcs';
+          }
+          result.total = val;
         }
-        val = val.replace(/\badet\b/gi, 'Pcs').replace(/\bpcs\b/gi, 'Pcs').trim();
-        if (val && !/pcs/i.test(val)) {
-          val += ' Pcs';
-        }
-        result.total = val;
         section = 'after_total';
         continue;
       }
 
       // 7. Diğer Renkler Header
-      if (/diğer\s*renk|renkler|colors/i.test(c0) || /diğer\s*renk/i.test(raw)) {
+      if (/diğer\s*renk|renkler|colors/i.test(col0) || /diğer\s*renk/i.test(raw)) {
         section = 'colors';
         continue;
       }
 
-      // Section-based collecting for single-column excels
+      // 8. Section-based collecting for single-column excels (e.g. 21011.xlsx, müşteriden gelen excel.xlsx)
       if (section === 'colors') {
-        const val = (c1 && !c0) ? c1 : c0;
-        if (val && !/^(asorti|toplam|total|composition|kumaş|renk|diğer)/i.test(val) && !/%/.test(val)) {
+        const val = col0 || (cells.length > 0 ? cells[0] : '');
+        if (val && !isPlaceholder(val) && !/^(asorti|toplam|total|composition|kumaş|renk|diğer)/i.test(val) && !/%/.test(val)) {
           if (!result.mainColor) {
             result.mainColor = val;
-          } else {
+          } else if (!result.colors.includes(val) && val !== result.mainColor) {
             result.colors.push(val);
           }
         }
       } else if (section === 'asorti') {
-        const val = (c1 && !c0) ? c1 : cells.join(' ');
-        if (val && !/^(toplam|total|composition|kumaş)/i.test(val) && !/%/.test(val)) {
+        const val = col0 || cells.join(' ');
+        if (val && !isPlaceholder(val) && !/^(toplam|total|composition|kumaş)/i.test(val) && !/%/.test(val)) {
           asortiLines.push(val);
         }
       } else if (section === 'after_total') {
-        if (!result.composition) {
+        if (!result.composition && (/%/.test(raw) || /pamuk|naylon|akrilik|polyester|viskon/i.test(raw))) {
           result.composition = raw;
         }
       }
