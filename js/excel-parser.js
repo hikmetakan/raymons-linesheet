@@ -10,18 +10,28 @@
 
 class ExcelParser {
   /**
-   * Parse an Excel file (ArrayBuffer or File)
+   * Parse an Excel file (ArrayBuffer, File, or raw string/CSV)
    * Scans all sheets in the workbook and automatically selects the sheet
    * that contains the most complete garment data.
-   * @param {File|ArrayBuffer} fileOrBuffer
+   * @param {File|ArrayBuffer|string} fileOrBufferOrText
    * @returns {Promise<Object>} Extracted Linesheet Data
    */
-  static async parse(fileOrBuffer) {
+  static async parse(fileOrBufferOrText) {
+    // If raw string / CSV passed
+    if (typeof fileOrBufferOrText === 'string') {
+      return this.parseText(fileOrBufferOrText);
+    }
+
     let data;
-    if (fileOrBuffer instanceof File) {
-      data = await fileOrBuffer.arrayBuffer();
+    if (fileOrBufferOrText instanceof File) {
+      // Check if it's a CSV or text file
+      if (fileOrBufferOrText.name && fileOrBufferOrText.name.toLowerCase().endsWith('.csv')) {
+        const text = await fileOrBufferOrText.text();
+        return this.parseText(text);
+      }
+      data = await fileOrBufferOrText.arrayBuffer();
     } else {
-      data = fileOrBuffer;
+      data = fileOrBufferOrText;
     }
 
     const workbook = XLSX.read(data, { type: 'array' });
@@ -47,13 +57,35 @@ class ExcelParser {
     }
 
     if (!bestResult || highestScore <= 0) {
-      // Fallback: Return empty structure if no sheet had readable data
       const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = firstSheet ? XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' }) : [];
       return this.extractGarmentData(rows, workbook.SheetNames[0]);
     }
 
     return bestResult;
+  }
+
+  /**
+   * Parse raw CSV or pasted text directly (tab-separated or comma-separated)
+   */
+  static parseText(text) {
+    if (!text || typeof text !== 'string') return null;
+
+    try {
+      // Use SheetJS CSV parser
+      const workbook = XLSX.read(text, { type: 'string' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+      return this.extractGarmentData(rows, 'PastedText');
+    } catch (e) {
+      // Manual fallback parser for simple lines
+      const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+      const rows = lines.map(line => {
+        if (line.includes('\t')) return line.split('\t').map(c => c.trim());
+        return line.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+      });
+      return this.extractGarmentData(rows, 'PastedFallback');
+    }
   }
 
   /**

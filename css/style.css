@@ -1246,6 +1246,64 @@ textarea.form-input {
   text-align: center;
 }
 
+/* Toast Notification Banner */
+.toast-banner {
+  position: fixed;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid #38bdf8;
+  color: #f1f5f9;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.3);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-banner.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.toast-icon {
+  font-size: 1.1rem;
+}
+
+.toast-message {
+  white-space: nowrap;
+}
+
+/* Global dragover overlay on body */
+body.file-drag-active::after {
+  content: "📂 Excel veya CSV dosyasını buraya bırakın";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #38bdf8;
+  border: 4px dashed #38bdf8;
+  z-index: 9999;
+  pointer-events: none;
+}
+
 /* ==========================================================================
    MOBILE & RESPONSIVE DESIGN (iOS HIG & Android M3 Optimized)
    ========================================================================== */

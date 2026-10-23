@@ -51,13 +51,14 @@ class LinesheetApp {
   }
 
   /* ==========================================================================
-     EXCEL IMPORT
+     EXCEL IMPORT & DRAG-AND-DROP
      ========================================================================== */
   initExcelDropzone() {
     const dropzone = document.getElementById('excel-dropzone');
     const input = document.getElementById('excel-input');
     if (!dropzone || !input) return;
 
+    // Clicking dropzone triggers hidden file input
     dropzone.addEventListener('click', () => input.click());
 
     input.addEventListener('change', async (e) => {
@@ -67,6 +68,7 @@ class LinesheetApp {
       }
     });
 
+    // Local dropzone drag events
     ['dragenter', 'dragover'].forEach(name => {
       dropzone.addEventListener(name, (e) => {
         e.preventDefault();
@@ -91,15 +93,82 @@ class LinesheetApp {
         await this.handleExcelFile(e.dataTransfer.files[0]);
       }
     });
+
+    // Global drag & drop on window: user can drop Excel anywhere on screen!
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      document.body.classList.add('file-drag-active');
+    });
+
+    ['dragleave', 'dragend'].forEach(name => {
+      window.addEventListener(name, (e) => {
+        if (e.clientX <= 0 || e.clientY <= 0) {
+          document.body.classList.remove('file-drag-active');
+        }
+      });
+    });
+
+    window.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      document.body.classList.remove('file-drag-active');
+      if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (/\.(xlsx|xls|csv)$/i.test(file.name)) {
+          await this.handleExcelFile(file);
+        }
+      }
+    });
+
+    // Direct Text / CSV Paste Box Handlers
+    const togglePasteBtn = document.getElementById('btn-toggle-paste');
+    const pasteContainer = document.getElementById('paste-container');
+    const applyPasteBtn = document.getElementById('btn-apply-paste');
+    const pasteTextarea = document.getElementById('input-paste-text');
+
+    togglePasteBtn?.addEventListener('click', () => {
+      if (pasteContainer) {
+        const isHidden = pasteContainer.style.display === 'none';
+        pasteContainer.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) pasteTextarea?.focus();
+      }
+    });
+
+    applyPasteBtn?.addEventListener('click', async () => {
+      const text = pasteTextarea ? pasteTextarea.value.trim() : '';
+      if (!text) {
+        alert('Lütfen kutuya Excel tablosundan kopyaladığınız metni yapıştırın.');
+        return;
+      }
+      try {
+        const parsed = await ExcelParser.parse(text);
+        this.applyParsedData(parsed);
+      } catch (err) {
+        console.error('Paste parse error:', err);
+        alert('Metin çözümlenirken hata oluştu: ' + err.message);
+      }
+    });
+  }
+
+  showToast(message, icon = '✨') {
+    const banner = document.getElementById('toast-banner');
+    const msgEl = document.getElementById('toast-message');
+    const iconEl = document.getElementById('toast-icon');
+    if (!banner) return;
+
+    if (msgEl) msgEl.innerText = message;
+    if (iconEl) iconEl.innerText = icon;
+
+    banner.classList.add('show');
+    clearTimeout(this._toastTimeout);
+    this._toastTimeout = setTimeout(() => {
+      banner.classList.remove('show');
+    }, 4500);
   }
 
   async handleExcelFile(file) {
     try {
       const parsed = await ExcelParser.parse(file);
       this.applyParsedData(parsed);
-
-      const colorCount = parsed.colors ? parsed.colors.length : 0;
-      alert(`Excel başarıyla aktarıldı!\n• Article No: ${parsed.articleNo || '-'}\n• Ana Renk (Color): ${parsed.mainColor || '-'}\n• Diğer Renkler: ${colorCount} adet\n• Asorti: ${parsed.asorti || '-'}\n• Total: ${parsed.total || '-'}\n• Composition: ${parsed.composition || '-'}`);
     } catch (err) {
       console.error('Excel parse error:', err);
       alert('Excel dosyası okunurken hata oluştu: ' + err.message);
@@ -136,6 +205,15 @@ class LinesheetApp {
     this.applyTypographyStyles();
 
     this.imageManager.autoMatchImages();
+
+    // Show non-blocking toast
+    const colorCount = parsed.colors ? parsed.colors.length : 0;
+    this.showToast(`🎉 ${this.data.articleNo} (${this.data.mainColor}) ve ${colorCount} renk aktarıldı!`);
+
+    // If on mobile/tablet view, automatically switch to preview mode so user sees linesheet!
+    if (window.innerWidth <= 900 && this.setMobileView) {
+      setTimeout(() => this.setMobileView('preview'), 250);
+    }
   }
 
   /* ==========================================================================
@@ -465,6 +543,7 @@ class LinesheetApp {
         previewBtn?.classList.remove('active');
       }
     };
+    this.setMobileView = setMobileView;
 
     // Initial view for mobile: preview mode by default
     if (window.innerWidth <= 900 && container) {
