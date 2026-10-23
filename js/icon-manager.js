@@ -7,123 +7,119 @@ class IconManager {
   constructor(app) {
     this.app = app;
 
-    // Full catalog of supported fabric & performance icons
+    // Full catalog of supported fabric & performance icons (all 200x200 clean transparent PNGs)
     this.catalog = {
       nylon: {
         id: 'nylon',
         name: 'Polyamid / Naylon',
         code: 'NYLON',
         category: 'fabric',
-        src: 'assets/icons/nylon.png',
-        svgSrc: 'assets/icons/nylon.svg'
+        src: 'assets/icons/nylon.png'
       },
       lycra: {
         id: 'lycra',
         name: 'Likra / Elastan',
         code: 'LYCRA',
         category: 'fabric',
-        src: 'assets/icons/lycra.png',
-        svgSrc: 'assets/icons/lycra.svg'
+        src: 'assets/icons/lycra.png'
       },
       cotton: {
         id: 'cotton',
         name: 'Pamuk (Cotton)',
         code: 'COTTON',
         category: 'fabric',
-        src: 'assets/icons/cotton.svg'
+        src: 'assets/icons/cotton.png'
       },
       acrylic: {
         id: 'acrylic',
         name: 'Akrilik (Acrylic)',
         code: 'ACRYLIC',
         category: 'fabric',
-        src: 'assets/icons/acrylic.svg'
+        src: 'assets/icons/acrylic.png'
       },
       polyester: {
         id: 'polyester',
         name: 'Polyester',
         code: 'POLYESTER',
         category: 'fabric',
-        src: 'assets/icons/polyester.svg'
+        src: 'assets/icons/polyester.png'
       },
       viscose: {
         id: 'viscose',
         name: 'Viskon (Viscose)',
         code: 'VISCOSE',
         category: 'fabric',
-        src: 'assets/icons/viscose.svg'
+        src: 'assets/icons/viscose.png'
       },
       wool: {
         id: 'wool',
         name: 'Yün (Wool)',
         code: 'WOOL',
         category: 'fabric',
-        src: 'assets/icons/wool.svg'
+        src: 'assets/icons/wool.png'
       },
       linen: {
         id: 'linen',
         name: 'Keten (Linen)',
         code: 'LINEN',
         category: 'fabric',
-        src: 'assets/icons/linen.svg'
+        src: 'assets/icons/linen.png'
       },
       modal: {
         id: 'modal',
         name: 'Modal',
         code: 'MODAL',
         category: 'fabric',
-        src: 'assets/icons/modal.svg'
+        src: 'assets/icons/modal.png'
       },
       silk: {
         id: 'silk',
         name: 'İpek (Silk)',
         code: 'SILK',
         category: 'fabric',
-        src: 'assets/icons/silk.svg'
+        src: 'assets/icons/silk.png'
       },
       breathable: {
         id: 'breathable',
         name: 'Nefes Alabilir',
         code: 'BREATHABLE\nFABRIC',
         category: 'feature',
-        src: 'assets/icons/breathable.png',
-        svgSrc: 'assets/icons/breathable.svg'
+        src: 'assets/icons/breathable.png'
       },
       soft_touch: {
         id: 'soft_touch',
         name: 'Yumuşak Doku',
         code: 'SOFT\nTOUCH',
         category: 'feature',
-        src: 'assets/icons/soft_touch.png',
-        svgSrc: 'assets/icons/soft_touch.svg'
+        src: 'assets/icons/soft_touch.png'
       },
       stretch: {
         id: 'stretch',
         name: '4 Yönlü Esnek',
         code: '4-WAY\nSTRETCH',
         category: 'feature',
-        src: 'assets/icons/stretch.svg'
+        src: 'assets/icons/stretch.png'
       },
       water_repellent: {
         id: 'water_repellent',
         name: 'Su İtici',
         code: 'WATER\nREPELLENT',
         category: 'feature',
-        src: 'assets/icons/water_repellent.svg'
+        src: 'assets/icons/water_repellent.png'
       },
       quick_dry: {
         id: 'quick_dry',
         name: 'Hızlı Kuruma',
         code: 'QUICK\nDRY',
         category: 'feature',
-        src: 'assets/icons/quick_dry.svg'
+        src: 'assets/icons/quick_dry.png'
       },
       easy_care: {
         id: 'easy_care',
         name: 'Kolay Ütülenir',
         code: 'EASY\nCARE',
         category: 'feature',
-        src: 'assets/icons/easy_care.svg'
+        src: 'assets/icons/easy_care.png'
       }
     };
 
@@ -151,10 +147,8 @@ class IconManager {
 
     const index = this.activeIcons.indexOf(iconId);
     if (index > -1) {
-      // Remove
       this.activeIcons.splice(index, 1);
     } else {
-      // Add (up to 5 icons)
       if (this.activeIcons.length >= 6) {
         alert('En fazla 6 adet karışım ikonu ekleyebilirsiniz.');
         return;
@@ -179,9 +173,6 @@ class IconManager {
     this.renderLinesheetIcons();
   }
 
-  /**
-   * Render the icon cards in the sidebar picker
-   */
   renderPickerGrid() {
     const container = document.getElementById('icon-picker-grid');
     if (!container) return;
@@ -196,7 +187,6 @@ class IconManager {
       `;
     }).join('');
 
-    // Attach click events
     container.querySelectorAll('.icon-card').forEach(card => {
       card.addEventListener('click', () => {
         const id = card.dataset.id;
@@ -205,9 +195,6 @@ class IconManager {
     });
   }
 
-  /**
-   * Render the active icons tray in the sidebar
-   */
   renderActiveTray() {
     const tray = document.getElementById('active-icons-tray');
     if (!tray) return;
@@ -229,9 +216,6 @@ class IconManager {
     }).join('');
   }
 
-  /**
-   * Render icons on the actual Linesheet sheet preview
-   */
   renderLinesheetIcons() {
     const container = document.getElementById('ls-icons-row');
     if (!container) return;
@@ -243,7 +227,7 @@ class IconManager {
       return `
         <div class="ls-icon-unit" title="${icon.name}">
           <div class="ls-icon-img">
-            <img src="${icon.src}" alt="${icon.name}">
+            <img src="${icon.src}" alt="${icon.name}" width="54" height="54">
           </div>
           <div class="ls-icon-caption">${formattedCode}</div>
         </div>

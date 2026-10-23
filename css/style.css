@@ -51,7 +51,7 @@ body {
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 12px 24px;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -71,7 +71,7 @@ body {
   font-family: 'Montserrat', sans-serif;
   font-weight: 300;
   letter-spacing: 0.18em;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -111,9 +111,9 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 7px 13px;
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.18s ease-in-out;
@@ -123,7 +123,12 @@ body {
 
 .btn-sm {
   padding: 5px 10px;
-  font-size: 0.75rem;
+  font-size: 0.73rem;
+}
+
+.btn-xs {
+  padding: 3px 8px;
+  font-size: 0.68rem;
 }
 
 .btn-secondary {
@@ -133,7 +138,7 @@ body {
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.16);
   border-color: rgba(255, 255, 255, 0.25);
   color: #ffffff;
 }
@@ -176,13 +181,13 @@ body {
 .studio-container {
   display: flex;
   flex: 1;
-  height: calc(100vh - 65px);
+  height: calc(100vh - 58px);
   overflow: hidden;
 }
 
 .control-sidebar {
   width: 440px;
-  min-width: 380px;
+  min-width: 390px;
   max-width: 480px;
   background: #0f172a;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
@@ -206,12 +211,12 @@ body {
   border: none;
   border-bottom: 2px solid transparent;
   color: #94a3b8;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.15s ease;
@@ -230,7 +235,7 @@ body {
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 16px;
 }
 
 .sidebar-content::-webkit-scrollbar {
@@ -245,7 +250,7 @@ body {
 .tab-panel {
   display: none;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .tab-panel.active {
@@ -257,18 +262,18 @@ body {
   background: #1e293b;
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px;
 }
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .section-title {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -279,7 +284,7 @@ body {
 }
 
 .badge {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 600;
@@ -294,7 +299,7 @@ body {
 .dropzone {
   border: 2px dashed rgba(255, 255, 255, 0.18);
   border-radius: 8px;
-  padding: 24px 16px;
+  padding: 20px 14px;
   text-align: center;
   background: rgba(255, 255, 255, 0.02);
   cursor: pointer;
@@ -318,34 +323,36 @@ body {
 }
 
 .dropzone-icon {
-  font-size: 2rem;
-  margin-bottom: 8px;
+  font-size: 1.8rem;
+  margin-bottom: 6px;
   color: #38bdf8;
 }
 
 .dropzone-text {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: #cbd5e1;
   font-weight: 500;
 }
 
 .dropzone-hint {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: #64748b;
   margin-top: 4px;
 }
 
 /* Form Controls */
 .form-group {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .form-label {
-  display: block;
-  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
   font-weight: 500;
   color: #94a3b8;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .form-input {
@@ -353,9 +360,9 @@ body {
   background: #0f172a;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 7px 10px;
   color: #ffffff;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-family: inherit;
   transition: border-color 0.15s ease;
 }
@@ -368,13 +375,38 @@ body {
 
 textarea.form-input {
   resize: vertical;
-  min-height: 50px;
+  min-height: 46px;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
+}
+
+/* Range Sliders */
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-slider {
+  flex: 1;
+  accent-color: #38bdf8;
+  height: 5px;
+  cursor: pointer;
+}
+
+.range-val-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 42px;
+  text-align: center;
 }
 
 /* ==========================================================================
@@ -417,14 +449,14 @@ textarea.form-input {
   box-shadow: 0 0 0 1px #38bdf8;
 }
 
-.icon-card img, .icon-card svg {
+.icon-card img {
   width: 32px;
   height: 32px;
   object-fit: contain;
   filter: brightness(0) invert(1);
 }
 
-.icon-card.active img, .icon-card.active svg {
+.icon-card.active img {
   filter: brightness(0) saturate(100%) invert(69%) sepia(85%) saturate(368%) hue-rotate(167deg) brightness(101%) contrast(97%);
 }
 
@@ -445,7 +477,7 @@ textarea.form-input {
   border: 1px dashed rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   padding: 10px;
-  min-height: 64px;
+  min-height: 54px;
   overflow-x: auto;
 }
 
@@ -459,7 +491,6 @@ textarea.form-input {
   padding: 4px 8px;
   font-size: 0.72rem;
   color: #38bdf8;
-  cursor: grab;
 }
 
 .tray-icon-item .remove-btn {
@@ -478,22 +509,28 @@ textarea.form-input {
 .slots-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .slot-item {
   background: #0f172a;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  padding: 10px;
+  padding: 8px 10px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  transition: all 0.15s ease;
+}
+
+.slot-item.slot-item-active {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
 }
 
 .slot-thumb {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 4px;
   background: #1e293b;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -502,7 +539,7 @@ textarea.form-input {
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
-  position: relative;
+  cursor: pointer;
 }
 
 .slot-thumb img {
@@ -512,7 +549,7 @@ textarea.form-input {
 }
 
 .slot-thumb .empty-icon {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #64748b;
 }
 
@@ -522,13 +559,13 @@ textarea.form-input {
 }
 
 .slot-title {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #e2e8f0;
 }
 
 .slot-desc {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: #64748b;
   white-space: nowrap;
   overflow: hidden;
@@ -539,7 +576,7 @@ textarea.form-input {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
-  max-height: 220px;
+  max-height: 200px;
   overflow-y: auto;
   padding: 8px;
   background: #0f172a;
@@ -588,8 +625,8 @@ textarea.form-input {
 .colors-reorder-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 380px;
+  gap: 6px;
+  max-height: 360px;
   overflow-y: auto;
 }
 
@@ -597,11 +634,10 @@ textarea.form-input {
   background: #0f172a;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  cursor: grab;
+  gap: 8px;
   transition: background 0.15s ease;
 }
 
@@ -614,6 +650,7 @@ textarea.form-input {
   color: #64748b;
   cursor: grab;
   font-size: 1rem;
+  user-select: none;
 }
 
 .color-order-badge {
@@ -625,17 +662,18 @@ textarea.form-input {
 }
 
 .color-thumb-box {
-  width: 36px;
-  height: 48px;
+  width: 34px;
+  height: 44px;
   border-radius: 4px;
   background: #1e293b;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .color-thumb-box img {
@@ -649,21 +687,22 @@ textarea.form-input {
   background: transparent;
   border: none;
   color: #ffffff;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
+  min-width: 0;
 }
 
 .color-input-name:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 4px;
-  padding: 2px 4px;
+  padding: 2px 6px;
 }
 
 .color-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .btn-icon-tiny {
@@ -676,6 +715,7 @@ textarea.form-input {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.72rem;
 }
 
 .btn-icon-tiny:hover {
@@ -689,7 +729,7 @@ textarea.form-input {
 }
 
 /* ==========================================================================
-   CANVAS WORKSPACE & PREVIEW
+   CANVAS WORKSPACE & CROP/ZOOM TOOLBAR
    ========================================================================== */
 .canvas-workspace {
   flex: 1;
@@ -701,33 +741,56 @@ textarea.form-input {
 }
 
 .workspace-toolbar {
-  padding: 10px 20px;
-  background: rgba(15, 23, 42, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 8px 16px;
+  background: rgba(15, 23, 42, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
   z-index: 20;
 }
 
 .toolbar-group {
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+
+.crop-bar-group {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 4px 10px;
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+.crop-slot-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #38bdf8;
+  max-width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .zoom-badge {
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 600;
   color: #cbd5e1;
-  min-width: 45px;
+  min-width: 42px;
   text-align: center;
 }
 
 .canvas-scroll-container {
   flex: 1;
   overflow: auto;
-  padding: 40px;
+  padding: 32px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -746,18 +809,17 @@ textarea.form-input {
 
 .canvas-wrapper {
   transform-origin: top center;
-  transition: transform 0.15s ease-out;
+  transition: transform 0.12s ease-out;
 }
 
 /* ==========================================================================
-   LINESHEET DOCUMENT (PIXEL PERFECT REPRODUCTION)
-   Target dimensions: 1080px wide x 1850px high
+   LINESHEET DOCUMENT (1080 x 1850 px EXACT REPRODUCTION WITH FIXED ARKAPLAN.PDF)
    ========================================================================== */
 .linesheet-sheet {
   width: var(--canvas-width);
   min-height: var(--canvas-height);
   height: var(--canvas-height);
-  background: #ffffff;
+  background-color: #ffffff;
   color: var(--primary);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
   position: relative;
@@ -766,43 +828,58 @@ textarea.form-input {
   user-select: text;
 }
 
-/* Header Section */
-.ls-logo {
+/* Fixed Background from arkaplan.pdf (Top Logo + Line & Bottom Footer + QR) */
+.ls-fixed-bg {
   position: absolute;
-  left: 48px;
-  top: 55px;
-  width: 380px;
-  height: 72px;
-  display: flex;
-  align-items: center;
+  top: 0;
+  left: 0;
+  width: 1080px;
+  height: 1850px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
 }
 
-.ls-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: left center;
-}
-
-/* Specs Block */
+/* Specs Block - Exact coordinates from bos-linesheet.ai */
 .ls-specs-container {
   position: absolute;
   left: 50px;
-  top: 145px;
-  width: 490px;
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  row-gap: 20px;
-  column-gap: 18px;
+  top: 148px;
+  width: 500px;
+  height: 195px;
+  z-index: 5;
 }
 
-.ls-spec-col {
-  display: flex;
-  flex-direction: column;
+.ls-spec-article {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 180px;
+}
+
+.ls-spec-composition {
+  position: absolute;
+  left: 185px;
+  top: 0;
+  width: 310px;
+}
+
+.ls-spec-asorti {
+  position: absolute;
+  left: 0;
+  top: 82px;
+  width: 358px;
+}
+
+.ls-spec-color {
+  position: absolute;
+  left: 368px;
+  top: 82px;
+  width: 132px;
 }
 
 .ls-label {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 300;
   color: #1d1d1b;
   margin-bottom: 2px;
@@ -810,28 +887,30 @@ textarea.form-input {
 }
 
 .ls-value {
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 500;
   color: #1d1d1b;
-  line-height: 1.25;
+  line-height: 1.22;
+  word-break: break-word;
 }
 
 .ls-value-total {
-  margin-top: 4px;
+  margin-top: 5px;
   font-weight: 600;
-  font-size: 22px;
+  font-size: 20px;
 }
 
 /* Blend / Feature Icons on the Linesheet */
 .ls-icons-row {
   position: absolute;
   left: 48px;
-  top: 375px;
-  width: 440px;
-  height: 85px;
+  top: 348px;
+  width: 460px;
+  height: 98px;
   display: flex;
   align-items: flex-start;
-  gap: 22px;
+  gap: 16px;
+  z-index: 5;
 }
 
 .ls-icon-unit {
@@ -839,32 +918,65 @@ textarea.form-input {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  width: 76px;
+  width: 74px;
   text-align: center;
 }
 
 .ls-icon-img {
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
-.ls-icon-img img, .ls-icon-img svg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.ls-icon-img img {
+  width: 54px;
+  height: 54px;
+  display: block;
 }
 
 .ls-icon-caption {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: #1d1d1b;
   line-height: 1.15;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
+}
+
+/* Interactive Image Frame (Common to Hero, Detail 1..4, and Color Variants) */
+.ls-image-frame {
+  position: relative;
+  overflow: hidden;
+  background-color: #f4f4f2;
+  cursor: grab;
+  user-select: none;
+  z-index: 4;
+}
+
+.ls-image-frame.is-dragging {
+  cursor: grabbing;
+}
+
+.ls-image-frame.slot-selected {
+  outline: 3px solid #38bdf8;
+  outline-offset: -3px;
+}
+
+.ls-image-frame.slot-dragover {
+  outline: 3px dashed #25D366;
+}
+
+/* Hide interactive outlines during PDF/Image export */
+.linesheet-sheet.is-exporting .ls-image-frame.slot-selected {
+  outline: none !important;
+}
+
+.linesheet-sheet.is-exporting .ls-editable {
+  outline: none !important;
+  background: transparent !important;
 }
 
 /* Hero / Lifestyle Image (Right Side) */
@@ -874,50 +986,25 @@ textarea.form-input {
   top: 0;
   width: 520px;
   height: 950px;
-  background: #f8fafc;
-  overflow: hidden;
-  cursor: pointer;
-  border-left: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-.ls-hero-image-slot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
 }
 
 /* Ana Renk 4 Görselleri (2x2 Grid) */
 .ls-detail-grid {
   position: absolute;
   left: 48px;
-  top: 464px;
+  top: 462px;
   width: 438px;
   height: 488px;
   display: grid;
   grid-template-columns: 208px 208px;
   grid-template-rows: 238px 238px;
-  gap: 22px 22px;
+  gap: 12px 22px;
+  z-index: 4;
 }
 
 .ls-detail-slot {
-  background: #f1f5f9;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  border-radius: 1px;
-}
-
-.ls-detail-slot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Specialized Crop for Slot 1 (waist/pocket zoom) */
-.ls-detail-slot.slot-zoom-waist img {
-  object-position: 50% 38%;
-  transform: scale(2.4);
+  width: 208px;
+  height: 238px;
 }
 
 /* Placeholder for Empty Image Slot */
@@ -928,13 +1015,13 @@ textarea.form-input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   background: #f3f4f6;
   color: #94a3b8;
   font-size: 12px;
   font-weight: 500;
   border: 1px dashed #cbd5e1;
-  transition: all 0.15s ease;
+  cursor: pointer;
 }
 
 .empty-slot-placeholder:hover {
@@ -942,35 +1029,14 @@ textarea.form-input {
   color: #475569;
 }
 
-.empty-slot-placeholder svg {
-  width: 24px;
-  height: 24px;
-  opacity: 0.6;
-}
-
 /* Bottom Colors Section (Ürün Renkleri) */
 .ls-variants-section {
   position: absolute;
   left: 48px;
-  top: 990px;
+  top: 980px;
   width: 984px;
-  min-height: 400px;
-}
-
-.ls-variants-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 180px);
-  justify-content: space-between;
-  row-gap: 24px;
-}
-
-/* Dynamic columns for many colors */
-.ls-variants-grid.cols-5 {
-  grid-template-columns: repeat(5, 175px);
-}
-
-.ls-variants-grid.cols-6 {
-  grid-template-columns: repeat(6, 145px);
+  max-height: 730px;
+  z-index: 4;
 }
 
 .ls-variant-card {
@@ -978,72 +1044,26 @@ textarea.form-input {
   flex-direction: column;
 }
 
-.ls-variant-thumb {
-  width: 100%;
-  height: 285px;
-  background: #f1f5f9;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-}
-
-.ls-variant-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
 .ls-variant-info {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .ls-variant-label {
   font-size: 20px;
   font-weight: 300;
   color: #1d1d1b;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
+  line-height: 1.1;
 }
 
 .ls-variant-name {
   font-size: 22px;
   font-weight: 500;
   color: #1d1d1b;
+  line-height: 1.15;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Footer Section */
-.ls-footer {
-  position: absolute;
-  left: 48px;
-  bottom: 25px;
-  width: 984px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ls-footer-line {
-  width: 100%;
-  height: 1px;
-  background-color: #707070;
-  opacity: 0.5;
-}
-
-.ls-footer-img {
-  width: 100%;
-  height: 65px;
-  display: flex;
-  align-items: center;
-}
-
-.ls-footer-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
 }
 
 /* Editable in-place hover effect */
@@ -1062,27 +1082,6 @@ textarea.form-input {
 .ls-editable:focus {
   background: rgba(56, 189, 248, 0.12);
   outline: 2px solid #2563eb;
-}
-
-/* Slot hover effect on linesheet */
-.ls-interactive-slot {
-  position: relative;
-  transition: all 0.15s ease;
-}
-
-.ls-interactive-slot:hover::after {
-  content: 'Değiştir';
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  backdrop-filter: blur(2px);
 }
 
 /* ==========================================================================
@@ -1139,7 +1138,7 @@ textarea.form-input {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .quality-card {
@@ -1215,7 +1214,6 @@ textarea.form-input {
   gap: 10px;
 }
 
-/* Progress bar inside modal */
 .progress-container {
   display: none;
   flex-direction: column;
@@ -1248,9 +1246,6 @@ textarea.form-input {
   text-align: center;
 }
 
-/* ==========================================================================
-   RESPONSIVE DESIGN
-   ========================================================================== */
 @media (max-width: 1024px) {
   .studio-container {
     flex-direction: column;

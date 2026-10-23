@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Raymons • Linesheet Studio | Otomatik Koleksiyon ve Katalog Sistemi</title>
   
-  <!-- Google Fonts: Montserrat -->
+  <!-- Google Fonts: Montserrat, Poppins, Inter, Outfit, Oswald, Playfair Display, Roboto -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Oswald:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   
   <!-- Studio Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
@@ -26,7 +26,7 @@
         <span class="brand-dot"></span>
         <span>LINESHEET</span>
       </div>
-      <span class="brand-badge">PRO STUDIO</span>
+      <span class="brand-badge">PRO STUDIO v2</span>
     </div>
 
     <!-- Quick Action Preset Buttons -->
@@ -66,10 +66,10 @@
       <!-- Tabs Header -->
       <div class="sidebar-tabs">
         <button class="tab-btn active" data-tab="excel">
-          <span>📊</span> Excel & Bilgi
+          <span>📊</span> Excel & Yazı
         </button>
         <button class="tab-btn" data-tab="icons">
-          <span>🏷️</span> Kumaş İkonları
+          <span>🏷️</span> İkonlar
         </button>
         <button class="tab-btn" data-tab="images">
           <span>🖼️</span> Görseller
@@ -85,7 +85,7 @@
       <!-- Tab Panels Content -->
       <div class="sidebar-content">
         
-        <!-- ==================== TAB 1: EXCEL & BİLGİLER ==================== -->
+        <!-- ==================== TAB 1: EXCEL, BİLGİLER & YAZI BOYUTU ==================== -->
         <div id="panel-excel" class="tab-panel active">
           
           <!-- Dropzone -->
@@ -99,7 +99,7 @@
               <input type="file" id="excel-input" accept=".xlsx, .xls, .csv">
               <div class="dropzone-icon">📑</div>
               <div class="dropzone-text">Excel dosyasını sürükleyin veya tıklayın</div>
-              <div class="dropzone-hint">.xlsx, .xls formatında müşteri dosyaları</div>
+              <div class="dropzone-hint">Article, İlk Renk (Ana Renk), Diğer Renkler, Asorti, Total ve Karışımı otomatik yerleştirir</div>
             </div>
           </div>
 
@@ -111,28 +111,113 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label" for="input-article">Article No / Kod</label>
+                <label class="form-label" for="input-article">Article No:</label>
                 <input type="text" id="input-article" class="form-input" placeholder="Örn: P1059">
               </div>
               <div class="form-group">
-                <label class="form-label" for="input-main-color">Ana Renk (Primary)</label>
+                <label class="form-label" for="input-main-color">Color: (İlk / Ana Renk)</label>
                 <input type="text" id="input-main-color" class="form-input" placeholder="Örn: Vizon">
               </div>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="input-composition">Kumaş İçeriği (Composition)</label>
+              <label class="form-label" for="input-composition">Composition: (Karışım)</label>
               <input type="text" id="input-composition" class="form-input" placeholder="Örn: %80 Naylon - %20 Elestan">
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="input-asorti">Asorti / Beden Dağılımı</label>
+              <label class="form-label" for="input-asorti">Asorti: (Beden Dağılımı)</label>
               <textarea id="input-asorti" class="form-input" rows="2" placeholder="Örn: 31:1 / 32:2 / 33:2 / 34:2 / 36:2 / 38:1"></textarea>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="input-total">Toplam Adet (Total)</label>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="input-total">Total: (Toplam Pcs)</label>
               <input type="text" id="input-total" class="form-input" placeholder="Örn: 10 Pcs">
+            </div>
+          </div>
+
+          <!-- Typography & Font Size Controls (Point 3) -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>🔤</span> Yazı Fontu & Büyüklüğü</span>
+              <button id="btn-reset-typo" class="btn btn-secondary btn-xs" title="Varsayılan boyutlara dön">Sıfırla</button>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="typo-font-family">Yazı Tipi (Font Family)</label>
+              <select id="typo-font-family" class="form-input">
+                <option value="'Montserrat', sans-serif">Montserrat (Orijinal Raymons)</option>
+                <option value="'Outfit', sans-serif">Outfit (Modern Geometrik)</option>
+                <option value="'Poppins', sans-serif">Poppins (Yumuşak Sans)</option>
+                <option value="'Inter', sans-serif">Inter (Minimalist Kurumsal)</option>
+                <option value="'Roboto', sans-serif">Roboto (Klasik Net)</option>
+                <option value="'Oswald', sans-serif">Oswald (Dar / Condensed)</option>
+                <option value="'Playfair Display', serif">Playfair Display (Lüks Serif)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Asorti Yazı Boyutu (Taşmayı Önler)</span>
+                <span id="typo-asorti-val" class="range-val-badge">19px</span>
+              </label>
+              <div class="range-row">
+                <input type="range" id="typo-asorti-size" class="range-slider" min="10" max="30" step="1" value="19">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Composition (Karışım) Boyutu</span>
+                <span id="typo-comp-val" class="range-val-badge">20px</span>
+              </label>
+              <div class="range-row">
+                <input type="range" id="typo-comp-size" class="range-slider" min="10" max="30" step="1" value="20">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">
+                  <span>Article No Boyutu</span>
+                  <span id="typo-article-val" class="range-val-badge">21px</span>
+                </label>
+                <input type="range" id="typo-article-size" class="range-slider" min="12" max="34" step="1" value="21">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <span>Ana Renk Boyutu</span>
+                  <span id="typo-color-val" class="range-val-badge">21px</span>
+                </label>
+                <input type="range" id="typo-color-size" class="range-slider" min="12" max="34" step="1" value="21">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">
+                  <span>Total Boyutu</span>
+                  <span id="typo-total-val" class="range-val-badge">20px</span>
+                </label>
+                <input type="range" id="typo-total-size" class="range-slider" min="11" max="30" step="1" value="20">
+              </div>
+
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">
+                  <span>Başlık Etiketleri</span>
+                  <span id="typo-label-val" class="range-val-badge">19px</span>
+                </label>
+                <input type="range" id="typo-label-size" class="range-slider" min="11" max="28" step="1" value="19">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:8px; margin-bottom:0;">
+              <label class="form-label">
+                <span>Satır Aralığı (Line Height)</span>
+                <span id="typo-lh-val" class="range-val-badge">1.22</span>
+              </label>
+              <input type="range" id="typo-line-height" class="range-slider" min="0.95" max="1.6" step="0.03" value="1.22">
             </div>
           </div>
         </div>
@@ -144,8 +229,8 @@
               <span class="section-title"><span>🏷️</span> Karışım İkonları Seçici</span>
               <span class="badge badge-info">Tıkla & Ekle</span>
             </div>
-            <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:12px;">
-              İstediğiniz kumaş lifi veya konfor özelliğine tıklayın; linesheet'teki ikon alanına otomatik olarak yerleşecektir.
+            <p style="font-size:0.74rem; color:#94a3b8; margin-bottom:12px;">
+              İstediğiniz kumaş lifine veya konfor özelliğine tıklayın; şablondaki ikon alanına anında yerleşir.
             </p>
 
             <div class="form-group">
@@ -153,14 +238,14 @@
               <div id="active-icons-tray" class="active-icons-tray"></div>
             </div>
 
-            <div class="form-group" style="margin-top: 14px;">
+            <div class="form-group" style="margin-top: 12px; margin-bottom:0;">
               <label class="form-label">Kumaş & Özellik Kataloğu:</label>
               <div id="icon-picker-grid" class="icon-picker-grid"></div>
             </div>
           </div>
         </div>
 
-        <!-- ==================== TAB 3: GÖRSELLER ==================== -->
+        <!-- ==================== TAB 3: GÖRSELLER & KIRPMA ==================== -->
         <div id="panel-images" class="tab-panel">
           
           <!-- Batch Upload -->
@@ -176,9 +261,10 @@
               <div class="dropzone-hint">Toplu seçim desteklenir (.jpg, .png, .webp)</div>
             </div>
 
-            <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size:0.7rem; color:#94a3b8;">💡 Görselleri şablon üzerinde sürükleyip büyütebilirsiniz.</span>
               <button class="btn btn-secondary btn-sm" onclick="window.linesheetApp.imageManager.autoMatchImages()">
-                <span>⚡</span> Akıllı Otomatik Eşleştir
+                <span>⚡</span> Akıllı Eşleştir
               </button>
             </div>
           </div>
@@ -200,20 +286,47 @@
           </div>
         </div>
 
-        <!-- ==================== TAB 4: RENK SIRALAMASI ==================== -->
+        <!-- ==================== TAB 4: RENK SIRALAMASI & OTOMATİK BOYUT ==================== -->
         <div id="panel-colors" class="tab-panel">
           <div class="panel-section">
             <div class="section-header">
-              <span class="section-title"><span>🎨</span> Renk Varyantları</span>
-              <button class="btn btn-secondary btn-sm" onclick="window.linesheetApp.colorManager.addColor()">
-                <span>+</span> Yeni Renk
+              <span class="section-title">
+                <span>🎨</span> Diğer Renkler
+                <span id="color-count-badge" class="badge badge-info">4 Renk</span>
+              </span>
+              <button class="btn btn-primary btn-sm" onclick="window.linesheetApp.colorManager.addColor()">
+                <span>+</span> Renk Ekle
               </button>
             </div>
-            <p style="font-size:0.75rem; color:#94a3b8; margin-bottom:12px;">
-              Sıralamayı değiştirmek için tutamaçtan (⋮⋮) sürükleyip bırakabilir veya ok tuşlarını kullanabilirsiniz.
+            <p style="font-size:0.73rem; color:#94a3b8; margin-bottom:10px;">
+              Renk sayısına göre (örn: 3 renk büyük, 20 renk kompakt) kutular <strong>otomatik büyür/küçülür</strong>. Sıralamak için <strong>⋮⋮</strong> tutamacını sürükleyin.
             </p>
 
             <div id="colors-reorder-list" class="colors-reorder-list"></div>
+          </div>
+
+          <!-- Auto / Manual Size Fine-Tuning -->
+          <div class="panel-section">
+            <div class="section-header">
+              <span class="section-title"><span>📐</span> Renk Alanı Boyut Ayarı</span>
+              <button id="btn-color-layout-auto" class="btn btn-secondary btn-xs">Otomatiğe Dön</button>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Renk Kutusu Büyüklüğü</span>
+                <span id="color-scale-val" class="range-val-badge">Otomatik (100%)</span>
+              </label>
+              <input type="range" id="color-scale-slider" class="range-slider" min="0.55" max="1.35" step="0.05" value="1.0">
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">
+                <span>Alt Renk Yazı Boyutu (0 = Otomatik)</span>
+                <span id="color-font-val" class="range-val-badge">Otomatik</span>
+              </label>
+              <input type="range" id="color-font-slider" class="range-slider" min="0" max="28" step="1" value="0">
+            </div>
           </div>
         </div>
 
@@ -232,7 +345,7 @@
                     <span>💬 WhatsApp İçin Optimize PDF</span>
                     <span class="quality-badge badge-whatsapp">HIZLI & HAFİF</span>
                   </div>
-                  <div class="quality-desc">Düşük dosya boyutu (~800KB), WhatsApp'ta anında iletilir, müşteriye gönderilmeye hazır.</div>
+                  <div class="quality-desc">Düşük dosya boyutu (~800KB), görsellerde sıfır esneme/bozulma ile WhatsApp'ta anında iletilir.</div>
                 </div>
               </div>
 
@@ -243,7 +356,7 @@
                     <span>🖨️ Matbaa & Baskı Kalitesi</span>
                     <span class="quality-badge badge-print">300 DPI HQ</span>
                   </div>
-                  <div class="quality-desc">Maksimum çözünürlük, kristal netliğinde vektör logo ve baskı için kayıpsız çıktı.</div>
+                  <div class="quality-desc">Maksimum çözünürlük, sabit arkaplan.pdf kalitesi ve birebir kadrajlı ürün görselleri.</div>
                 </div>
               </div>
 
@@ -266,20 +379,32 @@
     <!-- RIGHT MAIN CANVAS WORKSPACE -->
     <main class="canvas-workspace">
       
-      <!-- Toolbar -->
+      <!-- Top Workspace & Interactive Image Crop/Pan/Zoom Toolbar -->
       <div class="workspace-toolbar">
+        <!-- Canvas Zoom -->
         <div class="toolbar-group">
-          <button id="btn-zoom-out" class="btn btn-secondary btn-sm" title="Küçült">-</button>
+          <button id="btn-zoom-out" class="btn btn-secondary btn-sm" title="Sayfayı Küçült">-</button>
           <span id="zoom-percentage" class="zoom-badge">55%</span>
-          <button id="btn-zoom-in" class="btn btn-secondary btn-sm" title="Büyüt">+</button>
-          <button id="btn-zoom-fit" class="btn btn-secondary btn-sm" title="Ekrana Sığdır">Fit</button>
+          <button id="btn-zoom-in" class="btn btn-secondary btn-sm" title="Sayfayı Büyüt">+</button>
+          <button id="btn-zoom-fit" class="btn btn-secondary btn-sm" title="Ekrana Sığdır">Sığdır</button>
           <button id="btn-zoom-100" class="btn btn-secondary btn-sm" title="Gerçek Boyut 100%">100%</button>
         </div>
 
-        <div class="toolbar-group">
-          <span style="font-size:0.75rem; color:#64748b;">
-            💡 İpucu: Tasarım üzerindeki yazılara tıklayarak doğrudan düzenleyebilirsiniz.
-          </span>
+        <!-- Interactive Image Crop / Pan / Zoom Bar (Point 2) -->
+        <div id="crop-toolbar" class="crop-bar-group">
+          <span style="font-size:0.72rem; color:#94a3b8;">✂️ Seçili Görsel:</span>
+          <span id="crop-selected-label" class="crop-slot-badge">Ana Renk Detay 1</span>
+          
+          <button id="btn-crop-zoom-out" class="btn btn-secondary btn-xs" title="Görseli Küçült">🔍-</button>
+          <input type="range" id="crop-zoom-slider" class="range-slider" style="width:90px;" min="0.3" max="4.5" step="0.05" value="1.0" title="Görseli Büyüt / Küçült">
+          <button id="btn-crop-zoom-in" class="btn btn-secondary btn-xs" title="Görseli Büyüt">🔍+</button>
+          <span id="crop-zoom-val" class="range-val-badge">100%</span>
+
+          <button id="btn-crop-fit" class="btn btn-secondary btn-xs" title="Görselin tamamını kutuya sığdır">Tam Sığdır</button>
+          <button id="btn-crop-pants" class="btn btn-secondary btn-xs" title="Mankenin bel-paça pantolon kısmına odakla">Pantolon Odak</button>
+          <button id="btn-crop-waist" class="btn btn-secondary btn-xs" title="Kemer ve cep detayına yakınlaş">Kemer Zoom</button>
+          <button id="btn-crop-reset" class="btn btn-secondary btn-xs" title="Kadrajı Sıfırla">↺ Sıfırla</button>
+          <button id="btn-crop-change-img" class="btn btn-primary btn-xs" title="Bu kutuya yeni fotoğraf yükle">📁 Değiştir</button>
         </div>
       </div>
 
@@ -288,38 +413,37 @@
         <div id="canvas-wrapper" class="canvas-wrapper">
           
           <!-- ==========================================================================
-               THE ACTUAL LINESHEET SHEET (1080 x 1850 px exact AI template reproduction)
+               THE ACTUAL LINESHEET SHEET (1080 x 1850 px)
+               Uses Fixed arkaplan.pdf (assets/arkaplan.png) for Logo & Footer (Point 5)
                ========================================================================== -->
           <div id="linesheet-sheet" class="linesheet-sheet">
             
-            <!-- 1. Header: Raymons Life Logo -->
-            <div class="ls-logo">
-              <img src="assets/logo.png" alt="Raymons • Life">
-            </div>
+            <!-- 1. Fixed Background from arkaplan.pdf (Logo + Top Line + Bottom Footer + QR) -->
+            <img class="ls-fixed-bg" src="assets/arkaplan.png" alt="Raymons Fixed Background" width="1080" height="1850">
 
-            <!-- 2. Header: Garment Specs Grid -->
+            <!-- 2. Header: Garment Specs Block -->
             <div class="ls-specs-container">
-              <!-- Left Column: Article No -->
-              <div class="ls-spec-col">
+              <!-- Top Left: Article No -->
+              <div class="ls-spec-article">
                 <div class="ls-label">Article No:</div>
                 <div id="ls-val-article" class="ls-value ls-editable" contenteditable="true">P1059</div>
               </div>
 
-              <!-- Right Column: Composition -->
-              <div class="ls-spec-col">
+              <!-- Top Right: Composition -->
+              <div class="ls-spec-composition">
                 <div class="ls-label">Composition:</div>
                 <div id="ls-val-composition" class="ls-value ls-editable" contenteditable="true">%80 Naylon - %20 Elestan</div>
               </div>
 
               <!-- Second Row Left: Asorti & Total -->
-              <div class="ls-spec-col">
+              <div class="ls-spec-asorti">
                 <div class="ls-label">Asorti:</div>
                 <div id="ls-val-asorti" class="ls-value ls-editable" contenteditable="true">31:1 / 32:2 / 33:2 / 34:2 /<br>36:2 / 38:1</div>
                 <div id="ls-val-total" class="ls-value ls-value-total ls-editable" contenteditable="true">Total: 10 Pcs</div>
               </div>
 
-              <!-- Second Row Right: Color -->
-              <div class="ls-spec-col">
+              <!-- Second Row Right: Main Color -->
+              <div class="ls-spec-color">
                 <div class="ls-label">Color:</div>
                 <div id="ls-val-main-color" class="ls-value ls-editable" contenteditable="true">Vizon</div>
               </div>
@@ -330,39 +454,22 @@
               <!-- Rendered dynamically by IconManager -->
             </div>
 
-            <!-- 4. Hero / Lifestyle Image (Right Side) -->
-            <div id="ls-hero-slot" class="ls-hero-image-slot ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('hero')" title="Büyük Model Görselini Değiştir">
-              <img src="assets/samples/P1059-Vizon-İmaj.jpg" alt="Hero Lifestyle">
+            <!-- 4. Hero / Lifestyle Image (Right Side: 520 x 950) -->
+            <div id="ls-hero-slot" class="ls-hero-image-slot ls-image-frame" data-slot-key="hero" data-w="520" data-h="950" title="Sürükleyerek kaydırın, tekerlekle büyütün/küçültün, çift tıklayarak değiştirin">
             </div>
 
-            <!-- 5. Ana Renk 4 Detay Görselleri (2x2 Grid) -->
+            <!-- 5. Ana Renk 4 Detay Görselleri (2x2 Grid: each 208 x 238) -->
             <div class="ls-detail-grid">
-              <div id="ls-detail-1" class="ls-detail-slot slot-zoom-waist ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('detail1')" title="Detay 1 Görselini Değiştir">
-                <img src="assets/samples/P1059-Vizon-Model-Ön.jpg" alt="Detay 1">
-              </div>
-              <div id="ls-detail-2" class="ls-detail-slot ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('detail2')" title="Detay 2 Görselini Değiştir">
-                <img src="assets/samples/P1059-Vizon-Model-Ön.jpg" alt="Detay 2">
-              </div>
-              <div id="ls-detail-3" class="ls-detail-slot ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('detail3')" title="Detay 3 Görselini Değiştir">
-                <img src="assets/samples/P1059-Vizon-Model-ARKA.jpg" alt="Detay 3">
-              </div>
-              <div id="ls-detail-4" class="ls-detail-slot ls-interactive-slot" onclick="window.linesheetApp.pickDirectImage('detail4')" title="Detay 4 Görselini Değiştir">
-                <img src="assets/samples/P1059-Vizon-Ghost-Ön.jpg" alt="Detay 4">
-              </div>
+              <div id="ls-detail-1" class="ls-detail-slot ls-image-frame" data-slot-key="detail1" data-w="208" data-h="238" title="Detay 1 - Sürükleyerek kaydırın, çift tıklayarak fotoğraf seçin"></div>
+              <div id="ls-detail-2" class="ls-detail-slot ls-image-frame" data-slot-key="detail2" data-w="208" data-h="238" title="Detay 2 - Sürükleyerek kaydırın, çift tıklayarak fotoğraf seçin"></div>
+              <div id="ls-detail-3" class="ls-detail-slot ls-image-frame" data-slot-key="detail3" data-w="208" data-h="238" title="Detay 3 - Sürükleyerek kaydırın, çift tıklayarak fotoğraf seçin"></div>
+              <div id="ls-detail-4" class="ls-detail-slot ls-image-frame" data-slot-key="detail4" data-w="208" data-h="238" title="Detay 4 - Sürükleyerek kaydırın, çift tıklayarak fotoğraf seçin"></div>
             </div>
 
-            <!-- 6. Bottom Colors Section (Ürün Renkleri) -->
+            <!-- 6. Bottom Colors Section (Ürün Renkleri - Auto-scaling for 1 to 30+ colors) -->
             <div class="ls-variants-section">
               <div id="ls-variants-grid" class="ls-variants-grid">
                 <!-- Rendered dynamically by ColorManager -->
-              </div>
-            </div>
-
-            <!-- 7. Footer: Divider, Links & QR Code -->
-            <div class="ls-footer">
-              <div class="ls-footer-line"></div>
-              <div class="ls-footer-img">
-                <img src="assets/footer.png" alt="Raymons Footer">
               </div>
             </div>
 
@@ -392,7 +499,7 @@
               <span>💬 WhatsApp Paylaşım PDF</span>
               <span class="quality-badge badge-whatsapp">HIZLI & HAFİF</span>
             </div>
-            <div class="quality-desc">Sıkıştırılmış hafif PDF (~800KB). Müşterilere WhatsApp'tan dosya kotasını zorlamadan göndermek için idealdir.</div>
+            <div class="quality-desc">Sıkıştırılmış hafif PDF (~800KB). Görsellerde şişme/uzama olmadan WhatsApp'tan anında göndermek için idealdir.</div>
           </div>
         </div>
 
@@ -403,7 +510,7 @@
               <span>🖨️ Yüksek Çözünürlüklü Baskı PDF</span>
               <span class="quality-badge badge-print">300 DPI HQ</span>
             </div>
-            <div class="quality-desc">Kristal netliğinde vektör ve yüksek çözünürlüklü raster. Matbaa çıktısı ve katalog basımı içindir.</div>
+            <div class="quality-desc">Sabit arkaplan.pdf kalitesi ve birebir kadrajlanmış yüksek çözünürlüklü ürün fotoğrafları.</div>
           </div>
         </div>
 

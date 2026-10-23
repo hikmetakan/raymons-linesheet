@@ -1,6 +1,14 @@
 /**
  * RAYMONS LINESHEET STUDIO - EXCEL PARSER
  * Robust Garment & Textile Linesheet Parser
+ *
+ * Kurallar:
+ * 1. Artıcle / Article yazan kısımdaki numara -> Article No: kısmına
+ * 2. Color : bilgisinde ilk yazılan renk -> Ana Renk (üstteki Color: kısmına),
+ *    sonraki yazılan renkler -> diğer renkler (alttaki renk varyantlarına)
+ * 3. Asorti : bilgisi ve altındaki beden dağılımı -> Asorti: kısmına
+ * 4. Toplam : ... adet yazan bilgi -> Total: .. Pcs kısmına ("adet" -> "Pcs" çevrilir)
+ * 5. En sonda (veya % içeren) karışım bilgisi -> Composition: kısmına
  */
 
 class ExcelParser {
@@ -41,119 +49,132 @@ class ExcelParser {
       suggestedIcons: []
     };
 
-    // Flatten rows into non-empty string list for sequential inspection
     const flatRows = [];
     rows.forEach(row => {
       if (Array.isArray(row)) {
-        const rowStr = row.map(c => String(c).trim()).filter(Boolean).join(' | ');
-        if (rowStr) {
+        const cells = row.map(c => String(c).trim()).filter(Boolean);
+        if (cells.length > 0) {
           flatRows.push({
-            raw: rowStr,
-            cells: row.map(c => String(c).trim()).filter(Boolean)
+            raw: cells.join(' | '),
+            cells: cells
           });
         }
       }
     });
 
+    if (flatRows.length === 0) return result;
+
     let currentSection = 'header';
     const asortiLines = [];
+    const allFoundColors = [];
 
     for (let i = 0; i < flatRows.length; i++) {
       const { raw, cells } = flatRows[i];
-      const lower = raw.toLowerCase();
 
-      // 1. Article No
-      if (/art[ıi]cle|model|kod|stok\s*kod/i.test(raw)) {
-        const parts = raw.split(/[:：|]/);
-        if (parts.length > 1) {
-          result.articleNo = parts[1].trim();
+      // 1. Article / Artıcle No
+      if (/^(art[ıiIİ]cle|model|ürün\s*kodu|kod)/i.test(raw)) {
+        const afterColon = raw.split(/[:：|]/).slice(1).join(':').trim();
+        if (afterColon) {
+          result.articleNo = afterColon;
         } else if (cells.length > 1) {
           result.articleNo = cells[1];
         }
         continue;
       }
 
-      // 2. Composition (Kumaş İçeriği)
-      if (/%|kumaş|içerik|kompozisyon|composition/i.test(raw) && !/asorti/i.test(raw)) {
-        if (/%/.test(raw) || /pamuk|naylon|polyester|elestan|akrilik|viskon|keten|yün|lycra|nylon/i.test(raw)) {
-          const parts = raw.split(/[:：]/);
-          result.composition = (parts.length > 1 ? parts[1] : raw).trim();
-          continue;
-        }
-      }
-
-      // 3. Color / Renk Header & Main Color
-      if (/^(color|renk)\s*[:：]/i.test(raw) || /color\s*\|/i.test(raw)) {
-        const parts = raw.split(/[:：|]/);
-        if (parts.length > 1) {
-          result.mainColor = parts[1].trim();
+      // 2. Color / Renk Header
+      if (/^(color|renk|colors|renkler)\b/i.test(raw)) {
+        const afterColon = raw.split(/[:：|]/).slice(1).join(':').trim();
+        if (afterColon) {
+          // If multiple colors are comma-separated on the same line, split them
+          const inlineColors = afterColon.split(/[,/]/).map(s => s.trim()).filter(Boolean);
+          allFoundColors.push(...inlineColors);
         }
         currentSection = 'colors';
         continue;
       }
 
-      // 4. Asorti Header
-      if (/asorti|beden\s*dağılım/i.test(raw)) {
+      // 3. Asorti Header
+      if (/^asort[ıiIİ]|^beden/i.test(raw)) {
+        const afterColon = raw.split(/[:：|]/).slice(1).join(':').trim();
+        if (afterColon) {
+          asortiLines.push(afterColon);
+        }
         currentSection = 'asorti';
         continue;
       }
 
-      // 5. Total / Toplam
-      if (/toplam|total/i.test(raw)) {
-        const parts = raw.split(/[:：|]/);
-        if (parts.length > 1) {
-          result.total = parts[1].trim();
-        } else if (cells.length > 1) {
-          result.total = cells[1];
-        } else {
-          result.total = raw;
+      // 4. Toplam / Total
+      if (/^(toplam|total)\b/i.test(raw)) {
+        let afterColon = raw.split(/[:：|]/).slice(1).join(':').trim();
+        if (!afterColon && cells.length > 1) {
+          afterColon = cells[1];
         }
+        if (!afterColon) {
+          afterColon = raw.replace(/^(toplam|total)\s*/i, '').trim();
+        }
+        // Convert "4 adet" -> "4 Pcs"
+        afterColon = afterColon
+          .replace(/\badet\b/gi, 'Pcs')
+          .replace(/\bpcs\b/gi, 'Pcs')
+          .trim();
+        if (afterColon && !/pcs/i.test(afterColon)) {
+          afterColon += ' Pcs';
+        }
+        result.total = afterColon;
         currentSection = 'after_total';
         continue;
       }
 
-      // Section-based extraction
+      // 5. Composition / Karışım (explicit header or contains % or at the end)
+      if (/^(composition|kumaş|içerik|karışım)\b/i.test(raw) || /%/.test(raw)) {
+        const afterColon = /^(composition|kumaş|içerik|karışım)\s*[:：]/i.test(raw)
+          ? raw.split(/[:：]/).slice(1).join(':').trim()
+          : raw.replace(/\s*\|\s*/g, ' ').trim();
+        result.composition = afterColon;
+        continue;
+      }
+
+      // Section-based collection
       if (currentSection === 'colors') {
-        // Collect color rows
-        const colorName = cells[0];
-        if (colorName && !/asorti|toplam|total|adet|adet:|%/i.test(colorName)) {
-          // Check if this looks like a color name
-          if (colorName.length <= 30) {
-            result.colors.push(colorName);
-          }
+        const lineVal = cells[0];
+        if (lineVal && !/^(asorti|toplam|total|composition|kumaş)/i.test(lineVal) && !/%/.test(lineVal)) {
+          allFoundColors.push(lineVal);
         }
       } else if (currentSection === 'asorti') {
-        // Collect size breakdown rows e.g. "M - 1", "31:1", "L:2"
-        if (!/toplam|total|%/i.test(raw)) {
-          asortiLines.push(raw);
+        const lineVal = cells.join(' ');
+        if (lineVal && !/^(toplam|total|composition|kumaş)/i.test(lineVal) && !/%/.test(lineVal)) {
+          asortiLines.push(lineVal);
         }
       } else if (currentSection === 'after_total') {
-        // Look for composition if it came after total
-        if (/%|pamuk|naylon|elestan|akrilik|polyester|viskon/i.test(raw)) {
-          result.composition = raw;
+        // En sonda yazan karışım bilgisi (% olmasa bile son satırda kumaş yazıyorsa)
+        const lineVal = cells.join(' ').trim();
+        if (lineVal && !result.composition) {
+          result.composition = lineVal;
         }
       }
     }
 
-    // Format Asorti string
+    // Fallback: En son satır henüz composition olarak atanmadıysa ve after_total'daysa kontrol et
+    if (!result.composition && flatRows.length > 0) {
+      const lastRow = flatRows[flatRows.length - 1].raw;
+      if (/%|pamuk|naylon|polyester|elestan|elastan|akrilik|viskon|keten|yün|lycra|nylon|cotton/i.test(lastRow)) {
+        result.composition = lastRow.replace(/^(composition|karışım|kumaş)\s*[:：]\s*/i, '').trim();
+      }
+    }
+
+    // İlk yazılan renk Ana Renk (Color:), sonraki yazılan renkler Diğer Renkler
+    if (allFoundColors.length > 0) {
+      result.mainColor = allFoundColors[0];
+      result.colors = allFoundColors.slice(1);
+    }
+
+    // Format Asorti
     if (asortiLines.length > 0) {
       result.asorti = asortiLines.join(' / ');
     }
 
-    // Clean up Article No
-    if (result.articleNo) {
-      result.articleNo = result.articleNo.replace(/^(art[ıi]cle\s*no?[:\s]*)/i, '').trim();
-    }
-
-    // Clean up Total string (standardize to e.g. "Total: 10 Pcs" or "Toplam: 4 Adet")
-    if (result.total) {
-      result.total = result.total.replace(/^(toplam|total)[:\s]*/i, '').trim();
-      if (!/adet|pcs|pieces/i.test(result.total)) {
-        result.total += ' Pcs';
-      }
-    }
-
-    // Auto-detect fabric blend keywords from composition
+    // Auto-detect fabric blend icons from composition
     result.suggestedIcons = this.detectIconsFromComposition(result.composition);
 
     return result;
@@ -168,7 +189,7 @@ class ExcelParser {
     const comp = compositionText.toLowerCase();
     const icons = [];
 
-    if (/naylon|nylon|polyamid|polyamide/i.test(comp)) {
+    if (/naylon|nylon|polyamid|polyamide|poliamid/i.test(comp)) {
       icons.push('nylon');
     }
     if (/elestan|elastan|elastane|lycra|likra|spandex/i.test(comp)) {
@@ -180,10 +201,10 @@ class ExcelParser {
     if (/akrilik|acrylic/i.test(comp)) {
       icons.push('acrylic');
     }
-    if (/polyester|poly/i.test(comp)) {
+    if (/polyester|pes\b/i.test(comp)) {
       icons.push('polyester');
     }
-    if (/viskon|viscose|rayon/i.test(comp)) {
+    if (/viskon|viskoz|viscose|rayon/i.test(comp)) {
       icons.push('viscose');
     }
     if (/keten|linen/i.test(comp)) {
@@ -199,7 +220,7 @@ class ExcelParser {
       icons.push('silk');
     }
 
-    // Default comfort / performance features if icons < 4
+    // Add default comfort features up to 4 icons
     if (!icons.includes('breathable') && icons.length < 4) {
       icons.push('breathable');
     }

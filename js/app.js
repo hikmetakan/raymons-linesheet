@@ -14,6 +14,18 @@ class LinesheetApp {
       mainColor: 'Vizon'
     };
 
+    // Typography customization state (Point 3)
+    this.typography = {
+      fontFamily: "'Montserrat', sans-serif",
+      labelSize: 19,
+      articleSize: 21,
+      compositionSize: 20,
+      asortiSize: 19,
+      totalSize: 20,
+      mainColorSize: 21,
+      lineHeight: 1.22
+    };
+
     // Canvas zoom scale
     this.zoomScale = 0.55;
 
@@ -26,17 +38,15 @@ class LinesheetApp {
     this.initSidebarTabs();
     this.initExcelDropzone();
     this.initFormBindings();
+    this.initTypographyControls();
+    this.initColorLayoutControls();
     this.initZoomControls();
     this.initQuickActions();
 
     // Initial update of linesheet
     this.updateLinesheetText();
+    this.applyTypographyStyles();
     this.fitCanvasToScreen();
-
-    // Auto-resize listener
-    window.addEventListener('resize', () => {
-      // Keep canvas nicely scaled
-    });
   }
 
   /* ==========================================================================
@@ -52,6 +62,7 @@ class LinesheetApp {
     input.addEventListener('change', async (e) => {
       if (e.target.files.length > 0) {
         await this.handleExcelFile(e.target.files[0]);
+        e.target.value = '';
       }
     });
 
@@ -81,9 +92,8 @@ class LinesheetApp {
       const parsed = await ExcelParser.parse(file);
       this.applyParsedData(parsed);
 
-      // Notification
       const colorCount = parsed.colors ? parsed.colors.length : 0;
-      alert(`Excel başarıyla okundu!\n• Ürün: ${parsed.articleNo || 'Belirtilmedi'}\n• Ana Renk: ${parsed.mainColor || 'Belirtilmedi'}\n• Renk Sayısı: ${colorCount}\n• Kumaş: ${parsed.composition || 'Belirtilmedi'}`);
+      alert(`Excel başarıyla aktarıldı!\n• Article No: ${parsed.articleNo || '-'}\n• Ana Renk (Color): ${parsed.mainColor || '-'}\n• Diğer Renkler: ${colorCount} adet\n• Asorti: ${parsed.asorti || '-'}\n• Total: ${parsed.total || '-'}\n• Composition: ${parsed.composition || '-'}`);
     } catch (err) {
       console.error('Excel parse error:', err);
       alert('Excel dosyası okunurken hata oluştu: ' + err.message);
@@ -91,27 +101,34 @@ class LinesheetApp {
   }
 
   applyParsedData(parsed) {
-    if (parsed.articleNo) this.data.articleNo = parsed.articleNo;
-    if (parsed.composition) this.data.composition = parsed.composition;
-    if (parsed.asorti) this.data.asorti = parsed.asorti;
-    if (parsed.total) this.data.total = parsed.total;
-    if (parsed.mainColor) this.data.mainColor = parsed.mainColor;
+    if (parsed.articleNo !== undefined) this.data.articleNo = parsed.articleNo;
+    if (parsed.composition !== undefined) this.data.composition = parsed.composition;
+    if (parsed.asorti !== undefined) this.data.asorti = parsed.asorti;
+    if (parsed.total !== undefined) this.data.total = parsed.total;
+    if (parsed.mainColor !== undefined) this.data.mainColor = parsed.mainColor;
 
-    // Apply colors if found
+    // Auto-adjust Asorti font size if Asorti text is very long
+    if (this.data.asorti && this.data.asorti.length > 48) {
+      this.typography.asortiSize = 15;
+    } else if (this.data.asorti && this.data.asorti.length > 35) {
+      this.typography.asortiSize = 17;
+    } else {
+      this.typography.asortiSize = 19;
+    }
+
     if (parsed.colors && parsed.colors.length > 0) {
       this.colorManager.setColors(parsed.colors);
     }
 
-    // Apply suggested fabric icons
     if (parsed.suggestedIcons && parsed.suggestedIcons.length > 0) {
       this.iconManager.setActiveIcons(parsed.suggestedIcons);
     }
 
-    // Sync input form fields
     this.syncFormFields();
+    this.syncTypographyControls();
     this.updateLinesheetText();
+    this.applyTypographyStyles();
 
-    // Try auto-matching uploaded gallery if available
     this.imageManager.autoMatchImages();
   }
 
@@ -158,11 +175,152 @@ class LinesheetApp {
       }
     };
 
-    setInner('ls-val-article', this.data.articleNo || 'P1059');
-    setInner('ls-val-composition', this.data.composition || '%80 Naylon - %20 Elestan');
+    setInner('ls-val-article', this.data.articleNo || '');
+    setInner('ls-val-composition', this.data.composition || '');
     setInner('ls-val-asorti', (this.data.asorti || '').replace(/\n/g, '<br>'), true);
-    setInner('ls-val-total', this.data.total ? `Total: ${this.data.total}` : 'Total: 10 Pcs');
-    setInner('ls-val-main-color', this.data.mainColor || 'Vizon');
+
+    let totalStr = this.data.total || '';
+    if (totalStr && !/^total/i.test(totalStr)) {
+      totalStr = `Total: ${totalStr}`;
+    }
+    setInner('ls-val-total', totalStr);
+    setInner('ls-val-main-color', this.data.mainColor || '');
+  }
+
+  /* ==========================================================================
+     TYPOGRAPHY CONTROLS (POINT 3)
+     ========================================================================== */
+  initTypographyControls() {
+    const fontSelect = document.getElementById('typo-font-family');
+    if (fontSelect) {
+      fontSelect.value = this.typography.fontFamily;
+      fontSelect.addEventListener('change', (e) => {
+        this.typography.fontFamily = e.target.value;
+        this.applyTypographyStyles();
+      });
+    }
+
+    const bindSizeSlider = (sliderId, valBadgeId, key, unit = 'px') => {
+      const slider = document.getElementById(sliderId);
+      const badge = document.getElementById(valBadgeId);
+      if (!slider) return;
+
+      slider.value = this.typography[key];
+      if (badge) badge.innerText = `${this.typography[key]}${unit}`;
+
+      slider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        this.typography[key] = val;
+        if (badge) badge.innerText = `${val}${unit}`;
+        this.applyTypographyStyles();
+      });
+    };
+
+    bindSizeSlider('typo-asorti-size', 'typo-asorti-val', 'asortiSize');
+    bindSizeSlider('typo-comp-size', 'typo-comp-val', 'compositionSize');
+    bindSizeSlider('typo-article-size', 'typo-article-val', 'articleSize');
+    bindSizeSlider('typo-color-size', 'typo-color-val', 'mainColorSize');
+    bindSizeSlider('typo-total-size', 'typo-total-val', 'totalSize');
+    bindSizeSlider('typo-label-size', 'typo-label-val', 'labelSize');
+    bindSizeSlider('typo-line-height', 'typo-lh-val', 'lineHeight', '');
+
+    document.getElementById('btn-reset-typo')?.addEventListener('click', () => {
+      this.typography = {
+        fontFamily: "'Montserrat', sans-serif",
+        labelSize: 19,
+        articleSize: 21,
+        compositionSize: 20,
+        asortiSize: 19,
+        totalSize: 20,
+        mainColorSize: 21,
+        lineHeight: 1.22
+      };
+      this.syncTypographyControls();
+      this.applyTypographyStyles();
+    });
+  }
+
+  syncTypographyControls() {
+    const setSlider = (sliderId, badgeId, val, unit = 'px') => {
+      const s = document.getElementById(sliderId);
+      const b = document.getElementById(badgeId);
+      if (s) s.value = val;
+      if (b) b.innerText = `${val}${unit}`;
+    };
+
+    const fontSelect = document.getElementById('typo-font-family');
+    if (fontSelect) fontSelect.value = this.typography.fontFamily;
+
+    setSlider('typo-asorti-size', 'typo-asorti-val', this.typography.asortiSize);
+    setSlider('typo-comp-size', 'typo-comp-val', this.typography.compositionSize);
+    setSlider('typo-article-size', 'typo-article-val', this.typography.articleSize);
+    setSlider('typo-color-size', 'typo-color-val', this.typography.mainColorSize);
+    setSlider('typo-total-size', 'typo-total-val', this.typography.totalSize);
+    setSlider('typo-label-size', 'typo-label-val', this.typography.labelSize);
+    setSlider('typo-line-height', 'typo-lh-val', this.typography.lineHeight, '');
+  }
+
+  applyTypographyStyles() {
+    const sheet = document.getElementById('linesheet-sheet');
+    if (sheet) {
+      sheet.style.fontFamily = this.typography.fontFamily;
+    }
+
+    // Apply label sizes
+    document.querySelectorAll('.ls-specs-container .ls-label').forEach(el => {
+      el.style.fontSize = `${this.typography.labelSize}px`;
+    });
+
+    const applyFieldStyle = (id, size) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.fontSize = `${size}px`;
+        el.style.lineHeight = `${this.typography.lineHeight}`;
+      }
+    };
+
+    applyFieldStyle('ls-val-article', this.typography.articleSize);
+    applyFieldStyle('ls-val-composition', this.typography.compositionSize);
+    applyFieldStyle('ls-val-asorti', this.typography.asortiSize);
+    applyFieldStyle('ls-val-total', this.typography.totalSize);
+    applyFieldStyle('ls-val-main-color', this.typography.mainColorSize);
+  }
+
+  /* ==========================================================================
+     COLOR LAYOUT CONTROLS (POINT 4)
+     ========================================================================== */
+  initColorLayoutControls() {
+    const scaleSlider = document.getElementById('color-scale-slider');
+    const scaleVal = document.getElementById('color-scale-val');
+    if (scaleSlider) {
+      scaleSlider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        this.colorManager.cardScaleMultiplier = val;
+        if (scaleVal) scaleVal.innerText = `${Math.round(val * 100)}%`;
+        this.colorManager.renderLinesheetVariants();
+      });
+    }
+
+    const fontSlider = document.getElementById('color-font-slider');
+    const fontVal = document.getElementById('color-font-val');
+    if (fontSlider) {
+      fontSlider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        this.colorManager.customFontSize = val === 0 ? null : val;
+        if (fontVal) fontVal.innerText = val === 0 ? 'Otomatik' : `${val}px`;
+        this.colorManager.renderLinesheetVariants();
+      });
+    }
+
+    document.getElementById('btn-color-layout-auto')?.addEventListener('click', () => {
+      this.colorManager.cardScaleMultiplier = 1.0;
+      this.colorManager.customFontSize = null;
+      if (scaleSlider) scaleSlider.value = 1.0;
+      if (scaleVal) scaleVal.innerText = 'Otomatik (100%)';
+      if (fontSlider) fontSlider.value = 0;
+      if (fontVal) fontVal.innerText = 'Otomatik';
+      this.colorManager.renderLinesheetVariants();
+    });
   }
 
   /* ==========================================================================
@@ -191,6 +349,7 @@ class LinesheetApp {
         const file = e.target.files[0];
         const url = URL.createObjectURL(file);
         this.colorManager.updateColorImage(colorIndex, url);
+        this.imageManager.selectSlot(`color_${colorIndex}`);
       }
     };
     input.click();
@@ -247,9 +406,9 @@ class LinesheetApp {
 
     const scaleW = availableWidth / 1080;
     const scaleH = availableHeight / 1850;
-    const fitScale = Math.min(scaleW, scaleH, 0.7);
+    const fitScale = Math.min(scaleW, scaleH, 0.72);
 
-    this.zoomScale = Math.max(fitScale, 0.3);
+    this.zoomScale = Math.max(fitScale, 0.35);
     const wrapper = document.getElementById('canvas-wrapper');
     if (wrapper) {
       wrapper.style.transform = `scale(${this.zoomScale})`;
@@ -266,34 +425,28 @@ class LinesheetApp {
      QUICK ACTIONS & PRESETS
      ========================================================================== */
   initQuickActions() {
-    // 1. Örnek Doldur (P1059)
     document.getElementById('btn-load-sample')?.addEventListener('click', () => {
       this.loadSampleP1059();
     });
 
-    // 2. Müşteri Exceli Doldur (22920 - 18 colors)
     document.getElementById('btn-load-customer-excel')?.addEventListener('click', async () => {
       await this.loadCustomerExcelSample();
     });
 
-    // 3. Sıfırla
     document.getElementById('btn-reset')?.addEventListener('click', () => {
       if (confirm('Tüm bilgileri sıfırlamak istediğinize emin misiniz?')) {
         this.resetAll();
       }
     });
 
-    // 4. Quick WhatsApp Export button in navbar
     document.getElementById('btn-quick-whatsapp')?.addEventListener('click', () => {
       this.exportManager.showModal('whatsapp');
     });
 
-    // 5. Quick Print Export button in navbar
     document.getElementById('btn-quick-print')?.addEventListener('click', () => {
       this.exportManager.showModal('print');
     });
 
-    // 6. Direct JPG Export button
     document.getElementById('btn-quick-jpg')?.addEventListener('click', () => {
       this.exportManager.runExport('image');
     });
@@ -308,13 +461,17 @@ class LinesheetApp {
       mainColor: 'Vizon'
     };
 
+    this.typography.asortiSize = 19;
+    this.syncTypographyControls();
+    this.applyTypographyStyles();
+
     this.iconManager.setActiveIcons(['nylon', 'lycra', 'breathable', 'soft_touch']);
 
     this.colorManager.setColors([
-      { id: 'c1', name: 'Siyah', image: 'assets/samples/P1059-Siyah-Ghost-Ön.jpg' },
-      { id: 'c2', name: 'Lacivert', image: 'assets/samples/P1059-Lacivert-Ghost-Ön.jpg' },
-      { id: 'c3', name: 'Kahve', image: 'assets/samples/P1059-Kahve-Ghost-Ön.jpg' },
-      { id: 'c4', name: 'Haki', image: 'assets/samples/P1059-Haki-Ghost-Ön.jpg' }
+      { id: 'c1', name: 'Siyah', image: 'assets/samples/P1059-Siyah-Ghost-Ön.jpg', transform: { scale: 1.0, x: 0, y: 0 } },
+      { id: 'c2', name: 'Lacivert', image: 'assets/samples/P1059-Lacivert-Ghost-Ön.jpg', transform: { scale: 1.0, x: 0, y: 0 } },
+      { id: 'c3', name: 'Kahve', image: 'assets/samples/P1059-Kahve-Ghost-Ön.jpg', transform: { scale: 1.0, x: 0, y: 0 } },
+      { id: 'c4', name: 'Haki', image: 'assets/samples/P1059-Haki-Ghost-Ön.jpg', transform: { scale: 1.0, x: 0, y: 0 } }
     ]);
 
     this.imageManager.slots = {
@@ -325,8 +482,17 @@ class LinesheetApp {
       detail4: 'assets/samples/P1059-Vizon-Ghost-Ön.jpg'
     };
 
+    this.imageManager.transforms = {
+      hero: { scale: 1.85, x: 0, y: -260 },
+      detail1: { scale: 3.6, x: 0, y: 40 },
+      detail2: { scale: 1.15, x: 0, y: -65 },
+      detail3: { scale: 1.15, x: 0, y: -65 },
+      detail4: { scale: 0.88, x: 0, y: 0 }
+    };
+
     this.imageManager.renderSlotControls();
     this.imageManager.renderLinesheetSlots();
+    this.imageManager.updateCropToolbarUI();
 
     this.syncFormFields();
     this.updateLinesheetText();
@@ -338,7 +504,7 @@ class LinesheetApp {
       const buffer = await response.arrayBuffer();
       const parsed = await ExcelParser.parse(buffer);
       this.applyParsedData(parsed);
-      alert('Müşteri Exceli (Article: 22920, 18 Renkli) yüklendi! Renkler paneline gidip sıralamayı düzenleyebilirsiniz.');
+      alert(`Müşteri Exceli aktarıldı!\n• Article No: ${parsed.articleNo}\n• Ana Renk (Color): ${parsed.mainColor}\n• Diğer Renkler: ${parsed.colors.length} adet otomatik boyutlandırıldı\n• Asorti: ${parsed.asorti}\n• Total: ${parsed.total}\n• Composition: ${parsed.composition}`);
     } catch (err) {
       console.error('Fetch error:', err);
       alert('Örnek excel yüklenirken hata oluştu.');
@@ -355,10 +521,10 @@ class LinesheetApp {
     };
     this.iconManager.setActiveIcons([]);
     this.colorManager.setColors([
-      { id: 'c1', name: 'Renk 1', image: null },
-      { id: 'c2', name: 'Renk 2', image: null },
-      { id: 'c3', name: 'Renk 3', image: null },
-      { id: 'c4', name: 'Renk 4', image: null }
+      { id: 'c1', name: 'Renk 1', image: null, transform: { scale: 1.0, x: 0, y: 0 } },
+      { id: 'c2', name: 'Renk 2', image: null, transform: { scale: 1.0, x: 0, y: 0 } },
+      { id: 'c3', name: 'Renk 3', image: null, transform: { scale: 1.0, x: 0, y: 0 } },
+      { id: 'c4', name: 'Renk 4', image: null, transform: { scale: 1.0, x: 0, y: 0 } }
     ]);
     this.imageManager.slots = {
       hero: null,
@@ -374,7 +540,6 @@ class LinesheetApp {
   }
 }
 
-// Instantiate once DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   window.linesheetApp = new LinesheetApp();
 });
