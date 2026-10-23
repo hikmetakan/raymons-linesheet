@@ -2,13 +2,18 @@
  * RAYMONS LINESHEET STUDIO - EXCEL PARSER
  * Robust Garment & Textile Linesheet Parser
  *
+ * Desteklenen Formatlar:
+ * 1. Raymons_Linesheet_Siparis_Formu.xlsx (Profesyonel Müşteri Şablonu)
+ * 2. Tek sütunlu serbest müşteri listeleri (örn: müşteriden gelen excel.xlsx)
+ * 3. Tablo / kolonlu sipariş listeleri
+ *
  * Kurallar:
- * 1. Artıcle / Article yazan kısımdaki numara -> Article No: kısmına
- * 2. Color : bilgisinde ilk yazılan renk -> Ana Renk (üstteki Color: kısmına),
- *    sonraki yazılan renkler -> diğer renkler (alttaki renk varyantlarına)
- * 3. Asorti : bilgisi ve altındaki beden dağılımı -> Asorti: kısmına
- * 4. Toplam : ... adet yazan bilgi -> Total: .. Pcs kısmına ("adet" -> "Pcs" çevrilir)
- * 5. En sonda (veya % içeren) karışım bilgisi -> Composition: kısmına
+ * - Artıcle / Article numara -> Article No:
+ * - Color / Ana Renk -> İlk yazılan renk üstteki Color: alanına
+ * - Diğer Renkler (Renk 1, Renk 2... veya alt satırlar) -> Alttaki Renk Varyantlarına
+ * - Asorti -> Asorti: kısmına
+ * - Toplam ... adet -> Total: .. Pcs kısmına ("adet" -> "Pcs" otomatik çevrilir)
+ * - Kompozisyon (% veya kumaş lifi) -> Composition: kısmına
  */
 
 class ExcelParser {
@@ -49,127 +54,130 @@ class ExcelParser {
       suggestedIcons: []
     };
 
-    const flatRows = [];
-    rows.forEach(row => {
-      if (Array.isArray(row)) {
-        const cells = row.map(c => String(c).trim()).filter(Boolean);
-        if (cells.length > 0) {
-          flatRows.push({
-            raw: cells.join(' | '),
-            cells: cells
-          });
-        }
-      }
-    });
-
-    if (flatRows.length === 0) return result;
-
-    let currentSection = 'header';
     const asortiLines = [];
-    const allFoundColors = [];
+    let section = 'header';
 
-    for (let i = 0; i < flatRows.length; i++) {
-      const { raw, cells } = flatRows[i];
+    for (let r = 0; r < rows.length; r++) {
+      const row = rows[r];
+      if (!Array.isArray(row)) continue;
 
-      // 1. Article / Artıcle No
-      if (/^(art[ıiIİ]cle|model|ürün\s*kodu|kod)/i.test(raw)) {
-        const afterColon = raw.split(/[:：|]/).slice(1).join(':').trim();
-        if (afterColon) {
-          result.articleNo = afterColon;
-        } else if (cells.length > 1) {
-          result.articleNo = cells[1];
+      // Extract non-empty trimmed cells
+      const cells = row.map(c => String(c).trim()).filter(Boolean);
+      if (cells.length === 0) continue;
+
+      const c0 = cells[0];
+      const c1 = cells.length > 1 ? cells[1] : '';
+      const raw = cells.join(' | ');
+
+      // Skip table header titles
+      if (/ALAN ADI|FIELD NAME|ÖRNEK DOLDURULMUŞ|SİPARİŞ VE ÜRÜN BİLGİ/i.test(raw)) {
+        continue;
+      }
+
+      // 1. Article / Model No
+      if (/^(art[ıiIİ]cle|model|ürün\s*kodu|kod)/i.test(c0) || /^(art[ıiIİ]cle|model)\s*[:：]/i.test(raw)) {
+        let val = (c1 && !/^(art[ıiIİ]cle|model|kod)/i.test(c1)) ? c1 : '';
+        if (!val) {
+          const parts = raw.split(/[:：|]/);
+          if (parts.length > 1) val = parts[1].trim();
+        }
+        if (val) result.articleNo = val;
+        continue;
+      }
+
+      // 2. Renk X / Color X (Explicit variant row from Raymons Form, e.g. 'Renk 1:', 'Bordo')
+      if (/^(renk|color)\s*\d+[:：]?/i.test(c0)) {
+        const val = (c1 && !/varyant|renk\s*adı|örnek/i.test(c1)) ? c1 : '';
+        if (val) {
+          result.colors.push(val);
         }
         continue;
       }
 
-      // 2. Color / Renk Header
-      if (/^(color|renk|colors|renkler)\b/i.test(raw)) {
-        const afterColon = raw.split(/[:：|]/).slice(1).join(':').trim();
-        if (afterColon) {
-          // If multiple colors are comma-separated on the same line, split them
-          const inlineColors = afterColon.split(/[,/]/).map(s => s.trim()).filter(Boolean);
-          allFoundColors.push(...inlineColors);
+      // 3. Main Color (Color / Ana Renk)
+      if (/^(color|ana\s*renk|renk)\b/i.test(c0) || /^(color|renk)\s*[:：]/i.test(raw)) {
+        let val = (c1 && !/^(color|ana\s*renk|renk)/i.test(c1)) ? c1 : '';
+        if (!val) {
+          const parts = raw.split(/[:：|]/);
+          if (parts.length > 1 && parts[1].trim()) val = parts[1].trim();
         }
-        currentSection = 'colors';
+        if (val) {
+          result.mainColor = val;
+        }
+        section = 'colors';
         continue;
       }
 
-      // 3. Asorti Header
-      if (/^asort[ıiIİ]|^beden/i.test(raw)) {
-        const afterColon = raw.split(/[:：|]/).slice(1).join(':').trim();
-        if (afterColon) {
-          asortiLines.push(afterColon);
+      // 4. Composition / Kumaş İçeriği
+      if (/^(composition|kumaş|içerik|karışım)\b/i.test(c0) || /^(composition|kumaş)\s*[:：]/i.test(raw)) {
+        let val = (c1 && !/^(composition|kumaş|karışım)/i.test(c1)) ? c1 : '';
+        if (!val) {
+          const parts = raw.split(/[:：]/);
+          if (parts.length > 1) val = parts[1].trim();
         }
-        currentSection = 'asorti';
+        if (val) result.composition = val;
         continue;
       }
 
-      // 4. Toplam / Total
-      if (/^(toplam|total)\b/i.test(raw)) {
-        let afterColon = raw.split(/[:：|]/).slice(1).join(':').trim();
-        if (!afterColon && cells.length > 1) {
-          afterColon = cells[1];
+      // 5. Asorti Header
+      if (/^(asort[ıiIİ]|beden)/i.test(c0) || /^asort[ıiIİ]\s*[:：]/i.test(raw)) {
+        let val = (c1 && !/^(asort|beden)/i.test(c1)) ? c1 : '';
+        if (!val) {
+          const parts = raw.split(/[:：|]/);
+          if (parts.length > 1 && parts[1].trim()) val = parts[1].trim();
         }
-        if (!afterColon) {
-          afterColon = raw.replace(/^(toplam|total)\s*/i, '').trim();
-        }
-        // Convert "4 adet" -> "4 Pcs"
-        afterColon = afterColon
-          .replace(/\badet\b/gi, 'Pcs')
-          .replace(/\bpcs\b/gi, 'Pcs')
-          .trim();
-        if (afterColon && !/pcs/i.test(afterColon)) {
-          afterColon += ' Pcs';
-        }
-        result.total = afterColon;
-        currentSection = 'after_total';
+        if (val) asortiLines.push(val);
+        section = 'asorti';
         continue;
       }
 
-      // 5. Composition / Karışım (explicit header or contains % or at the end)
-      if (/^(composition|kumaş|içerik|karışım)\b/i.test(raw) || /%/.test(raw)) {
-        const afterColon = /^(composition|kumaş|içerik|karışım)\s*[:：]/i.test(raw)
-          ? raw.split(/[:：]/).slice(1).join(':').trim()
-          : raw.replace(/\s*\|\s*/g, ' ').trim();
-        result.composition = afterColon;
+      // 6. Toplam / Total
+      if (/^(toplam|total)\b/i.test(c0) || /^(toplam|total)\s*[:：]/i.test(raw)) {
+        let val = (c1 && !/^(toplam|total)/i.test(c1)) ? c1 : '';
+        if (!val) {
+          const parts = raw.split(/[:：|]/);
+          if (parts.length > 1) val = parts[1].trim();
+        }
+        if (!val) {
+          val = raw.replace(/^(toplam|total)[:\s]*/i, '').trim();
+        }
+        val = val.replace(/\badet\b/gi, 'Pcs').replace(/\bpcs\b/gi, 'Pcs').trim();
+        if (val && !/pcs/i.test(val)) {
+          val += ' Pcs';
+        }
+        result.total = val;
+        section = 'after_total';
         continue;
       }
 
-      // Section-based collection
-      if (currentSection === 'colors') {
-        const lineVal = cells[0];
-        if (lineVal && !/^(asorti|toplam|total|composition|kumaş)/i.test(lineVal) && !/%/.test(lineVal)) {
-          allFoundColors.push(lineVal);
+      // 7. Diğer Renkler Header
+      if (/diğer\s*renk|renkler|colors/i.test(c0) || /diğer\s*renk/i.test(raw)) {
+        section = 'colors';
+        continue;
+      }
+
+      // Section-based collecting for single-column excels
+      if (section === 'colors') {
+        const val = (c1 && !c0) ? c1 : c0;
+        if (val && !/^(asorti|toplam|total|composition|kumaş|renk|diğer)/i.test(val) && !/%/.test(val)) {
+          if (!result.mainColor) {
+            result.mainColor = val;
+          } else {
+            result.colors.push(val);
+          }
         }
-      } else if (currentSection === 'asorti') {
-        const lineVal = cells.join(' ');
-        if (lineVal && !/^(toplam|total|composition|kumaş)/i.test(lineVal) && !/%/.test(lineVal)) {
-          asortiLines.push(lineVal);
+      } else if (section === 'asorti') {
+        const val = (c1 && !c0) ? c1 : cells.join(' ');
+        if (val && !/^(toplam|total|composition|kumaş)/i.test(val) && !/%/.test(val)) {
+          asortiLines.push(val);
         }
-      } else if (currentSection === 'after_total') {
-        // En sonda yazan karışım bilgisi (% olmasa bile son satırda kumaş yazıyorsa)
-        const lineVal = cells.join(' ').trim();
-        if (lineVal && !result.composition) {
-          result.composition = lineVal;
+      } else if (section === 'after_total') {
+        if (!result.composition) {
+          result.composition = raw;
         }
       }
     }
 
-    // Fallback: En son satır henüz composition olarak atanmadıysa ve after_total'daysa kontrol et
-    if (!result.composition && flatRows.length > 0) {
-      const lastRow = flatRows[flatRows.length - 1].raw;
-      if (/%|pamuk|naylon|polyester|elestan|elastan|akrilik|viskon|keten|yün|lycra|nylon|cotton/i.test(lastRow)) {
-        result.composition = lastRow.replace(/^(composition|karışım|kumaş)\s*[:：]\s*/i, '').trim();
-      }
-    }
-
-    // İlk yazılan renk Ana Renk (Color:), sonraki yazılan renkler Diğer Renkler
-    if (allFoundColors.length > 0) {
-      result.mainColor = allFoundColors[0];
-      result.colors = allFoundColors.slice(1);
-    }
-
-    // Format Asorti
     if (asortiLines.length > 0) {
       result.asorti = asortiLines.join(' / ');
     }
